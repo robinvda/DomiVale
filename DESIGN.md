@@ -698,8 +698,8 @@ A rough first turn: collect 1/1/1 to reach 3 grain, 3 wood, 2 stone; buy one
 basic card; play the Farm, the chosen basic and the bought one, or play the
 banner card in place of one of them.
 
-**What the growth simulation measures.** The figures below come from a
-simulation of the rules above with greedy bots: scaled boards, claiming,
+**What the growth simulation measures.** The figures below come from
+`tools/growth_sim.py`, a simulation of the rules above with greedy bots: scaled boards, claiming,
 basic districts and their rising price, the play cap, the hand cap, bank
 trading, the rotating first seat, the opening hand and banner cards, Monument
 crowns, renown and the start-of-turn rule for city cells. It has no market
