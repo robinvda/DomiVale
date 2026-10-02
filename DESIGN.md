@@ -13,7 +13,8 @@ Every turn you collect goods from your land, buy cards from a shared market, and
 play them: a new district on your city, a new city somewhere else, or an army to
 take land from a rival. A city claims the land within three cells of it, so
 every district you add pushes your border out on the side you add it. Once land
-is claimed, the only way to take it is by force.
+is claimed, the only way to take it is by force. Land is the score: the house
+that holds the most of the valley at the end wins.
 
 ---
 
@@ -22,7 +23,8 @@ is claimed, the only way to take it is by force.
 1. **Where your city grows is the decision.** A district is not just a yield; it
    is a shape. Adding it on one side claims the land on that side, so every
    growth card asks "what, and which way?" Everything else in the game — goods,
-   cards, war — serves that one spatial question.
+   cards, war — serves that one spatial question, and the land you hold at the
+   end is what you are scored on, so the question never stops mattering.
 2. **You see the result before you commit.** No dice and no hidden formulas.
    An armed card shows exactly what it would do on every cell it could go to:
    what a district would yield, which cells it would claim, how much strength
@@ -31,9 +33,10 @@ is claimed, the only way to take it is by force.
 3. **Small and countable.** A 32×32 board, three goods, single-digit numbers,
    a fixed number of rounds. A player who has been away for two days reads the
    whole state of the match in one look.
-4. **A turn is one sitting.** Everything a turn holds is decided and undoable in
-   one go, and committed with one button. This is what makes bot matches quick
-   and asynchronous matches possible.
+4. **A turn is one sitting.** A turn plays at most three cards, is decided and
+   undoable in one go, and is committed with one button. A turn is a few
+   decisions, never a chore, however rich the house. This is what makes bot
+   matches quick and asynchronous matches possible.
 5. **Shared identity with the other Vale games.** Same look, same UI language,
    same world as LogiVale and LumaVale — different genre, different mechanics.
    Warm in tone even when it is about conquest.
@@ -242,8 +245,11 @@ is the 3×3 square around a cell.
 - A **district** is placed on an own territory cell that touches a cell of one of
   your cities, and becomes part of that city. Which kind of district it is
   depends on the card (§6).
-- A new city is founded with a **Settle** card on a cell that is unclaimed or
-  your own territory, and outside reach 3 of every city cell of every house.
+- A new city is founded with a **Settle** card on a land cell that no other
+  house owns and that is outside reach 3 of every city cell of every house. In
+  practice that is open land: your own territory is within reach 3 of your
+  cities by definition, so the only own cells that qualify are ones taken by
+  war far from your cities.
 - City cells never sit on water.
 
 ### 4.4 Claiming land
@@ -256,10 +262,12 @@ of it becomes yours.** That is the whole claiming rule.
   changes hands is war (§5).
 - Turns are sequential, so there are no ties: whoever grows toward a cell first
   claims it.
-- The board fills up. With four houses, most of the open land is gone by about
-  the middle of a match, and from then on a house grows through war, or upward
-  — more districts on land it already holds. That arc, a race for open land
-  and then a contest over borders, is intended.
+- The board fills up. With three cards a turn (§7.2) and the rising price of
+  growth (§6.1), four houses use up the open land over most of a match, and the
+  last rounds are a contest over borders: land then changes hands only by war,
+  and a house grows upward — more districts on land it already holds. That arc,
+  a race for open land and then a fight over it, is intended. With two houses
+  the race may last the whole match.
 
 ### 4.5 Yields
 
@@ -268,8 +276,8 @@ At the start of your turn every city produces:
 - **A heart** gives 1 grain, 1 wood and 1 stone.
 - **A gathering district** (Farm, Lumber camp, Quarry) gives 1 of its good for
   each cell of its terrain that **touches it and is your plain territory** — not
-  a city cell, not water, not a rival's. At most 4, usually 2–3, since a district
-  always touches the city it grew from.
+  a city cell, not water, not a rival's. At most 3, usually 1–2, since one of
+  the four touching cells is always the city cell it grew from.
 - A cell can feed every district that touches it. Two farms on either side of a
   meadow cell both count it.
 
@@ -288,7 +296,9 @@ touches a cell you own.
 
 - **Strength:** the card's strength, plus 1 if one of your Barracks is within
   reach 3 of the target. Several military cards played on the same target in
-  the same turn add up.
+  the same turn add up, within the three cards a turn allows (§7.2). A March
+  cannot be played on a city cell, so only Sieges add up against a district or
+  a heart: a bare heart needs two Sieges, or one Siege with a Barracks in reach.
 - **Defence:** what the target needs, shown on the cell while a military card is
   armed:
 
@@ -323,8 +333,12 @@ after: your rival sees what you took and answers.
 Districts belong to their city by identity, not by being connected to the
 heart, so a razed district in the middle never splits a city.
 
-A house with no hearts left is out of the match. Its remaining cells become
-unclaimed.
+A house with no hearts left is out of the match. Its remaining cells stay in
+its colour as **fallen land**: they yield nothing and score for nobody, no
+district can be placed on them, and growth never claims them. They are taken
+by war like any territory cell, at defence 1. So a fallen house's land is
+divided by whoever spends the cards, not handed to whoever happens to play
+next.
 
 ---
 
@@ -336,8 +350,14 @@ unclaimed.
   hand. A hand holds at most 5 cards.
 - A hand is hidden from rivals; how many cards it holds is not. A Siege kept in
   hand is a threat a rival has to respect without seeing it.
-- **Basic piles** — Farm, Lumber camp and Quarry — are always available, at a
-  fixed price, without limit. Growth is never blocked by a bad market.
+- **Basic piles** — Farm, Lumber camp and Quarry — are always available,
+  without limit. Growth is never blocked by a bad market.
+- **Growth gets dearer.** A basic card costs 1 grain and 1 wood, plus 1 grain
+  and 1 wood for every 5 districts the house already has. A house with 12
+  districts pays 3 grain and 3 wood for its next Farm. Market cards keep their
+  printed price, so as a house grows, a Settle, a Monument or a Siege becomes
+  the cheaper buy, and the match turns from growing to settling and fighting on
+  its own.
 - **The market row** holds 5 face-up cards from a shared, shuffled deck. Rivals
   see what you take, and sometimes the right buy is the card a rival needs.
 - **The row refills at the end of your turn**, not when a card is bought. That
@@ -349,9 +369,9 @@ unclaimed.
 
 | Card | Kind | Price | Effect |
 |---|---|---|---|
-| Farm | basic district | 1 grain, 1 wood | 1 grain per touching meadow |
-| Lumber camp | basic district | 1 grain, 1 wood | 1 wood per touching forest |
-| Quarry | basic district | 1 grain, 1 wood | 1 stone per touching hills |
+| Farm | basic district | 1 grain, 1 wood, rising (§6.1) | 1 grain per touching meadow |
+| Lumber camp | basic district | 1 grain, 1 wood, rising (§6.1) | 1 wood per touching forest |
+| Quarry | basic district | 1 grain, 1 wood, rising (§6.1) | 1 stone per touching hills |
 | Market | district | 2 grain, 2 wood | +1 crown; trade 2 for 1 |
 | Walls | district | 3 stone | +2 defence to your cells within reach 1 |
 | Barracks | district | 2 grain, 1 wood, 1 stone | +1 strength for your attacks within reach 3 |
@@ -360,8 +380,8 @@ unclaimed.
 | March | military | 1 grain, 1 wood | strength 2; not on city cells |
 | Siege | military | 2 grain, 2 stone | strength 4; any target |
 
-Every district, whatever its kind, claims land when placed (§4.4) and counts
-as a city cell for crowns. A Walls card is still a way to grow.
+Every district, whatever its kind, claims land when placed (§4.4), and claimed
+land is what scores (§7.3). A Walls card is still a way to grow.
 
 The deck's mix — how many of each market card — is the main tuning lever, along
 with prices. See §13 for starting numbers.
@@ -383,18 +403,31 @@ the first release; the base set is tuned first.
 - 2 to 4 houses, one of them the player, the others bots.
 - The generator places one heart per house, spread over the board, each with a
   fair share of meadow, forest and hills within reach 3 (§9).
+- Each house has a **banner** — Builder, Expander or Warlord. A bot's banner is
+  its temperament (§11); the player picks one at setup. The banner adds one
+  card to the opening hand: a Builder starts with a Market, an Expander with a
+  Settle, a Warlord with a March. From the first round each house plays
+  differently, and a rival's banner tells you what to expect from it.
 - Each house claims its starting land and starts with an **opening hand** of one
-  Farm, one Lumber camp and one Quarry, and **2 grain, 2 wood, 1 stone**.
+  Farm, one Lumber camp, one Quarry and its banner card, and **2 grain, 2 wood,
+  1 stone**.
 - Seats later in the turn order get +1 grain per seat, to balance going later.
 
 ### 7.2 A turn
 
 1. **Collect.** Your cities produce (§4.5).
-2. **Act**, in any order and as often as your goods and hand allow: buy cards,
-   trade, play cards.
+2. **Act**, in any order: buy cards, trade, play cards. Buying and trading are
+   limited only by your goods and the hand cap. **Playing is limited to 3 cards
+   a turn.** The HUD shows the plays left as three slots.
 3. **End turn.** The market row refills, and the next house plays.
 
 Everything in step 2 can be undone until you end the turn.
+
+The play cap is what keeps a turn a turn. Without it a rich house places a
+dozen districts in a sitting, income doubles every two rounds, and the valley is
+full by round six. With it, a turn is three decisions, goods pile up faster
+than they can be spent, and the question becomes which three cards to play and
+where — not how many.
 
 ### 7.3 Ending and crowns
 
@@ -403,12 +436,18 @@ one house has a heart left.
 
 Crowns, shown live in the HUD:
 
-- 1 per city cell (heart or district),
-- 1 per 5 plain territory cells,
+- 1 per 3 cells you own, city cells included,
+- +1 per heart,
 - +1 per Market, +3 per Monument.
 
-Most crowns wins. A tie goes to the house with more territory cells, then to
-the house later in the turn order.
+Most crowns wins. A tie goes to the house with more hearts, then to the house
+later in the turn order.
+
+Land is the score on purpose. A district is worth what it claims, not what it
+is, so once the open land is gone the only ways to gain are a Monument, a
+Market, a new city, or taking cells from a rival — and every cell taken counts
+twice, once for you and once against them. The border you drew in the first
+half is what you defend in the second.
 
 ### 7.4 The turn recap
 
@@ -425,7 +464,8 @@ when a player opens the app.
 
 Portrait-first, one thumb.
 
-- **HUD (top):** grain, wood and stone; crowns; round "7 / 20"; whose turn.
+- **HUD (top):** grain, wood and stone; crowns; round "7 / 20"; whose turn;
+  the three play slots for this turn.
 - **Board (middle):** pinch and drag to move, as in every Vale game; the camera
   starts at fit zoom.
 - **Hand (bottom):** the cards in hand as a fan, as LumaVale shows them. A
@@ -485,11 +525,14 @@ fill up with rings.
   the best. Turn-based play makes this cheap; it runs off the UI thread if a
   phone ever shows it.
 - **Temperaments** are weights on that score, and each bot house has one,
-  visible from its name and banner:
+  visible from its name and banner, and from the banner card it opens with
+  (§7.1):
   - **Builder** — values yield and crowns; rarely attacks, invests in Walls.
+    Opens with a Market.
   - **Expander** — values claimed land and new cities; races for open ground.
+    Opens with a Settle.
   - **Warlord** — values captures; keeps military cards in hand, goes for weak
-    borders.
+    borders. Opens with a March.
 - Difficulty comes from search depth and from how much a bot plans for the next
   turn — never from extra goods.
 
@@ -544,9 +587,12 @@ To be tuned by playing. Collected here so they are tuned in one place.
 | Rounds | 20 |
 | Claim reach | 3 (37 cells) |
 | Settle distance | outside reach 3 of every city cell |
+| Plays per turn | 3 |
 | Hand cap | 5 |
 | Market row | 5 |
 | Bank trade | 3 for 1 (Market: 2 for 1) |
+| Basic card price | 1 grain, 1 wood, +1 of each per 5 districts owned |
+| Opening hand | Farm, Lumber camp, Quarry, banner card |
 | Starting goods | 2 grain, 2 wood, 1 stone (+1 grain per later seat) |
 | Heart yield | 1 of each good |
 | Defence: unclaimed / territory / district / heart | 0 / 1 / 3 / 5 |
@@ -554,15 +600,26 @@ To be tuned by playing. Collected here so they are tuned in one place.
 | Walls bonus | +2 within reach 1 |
 | Barracks bonus | +1 within reach 3 |
 | March / Siege strength | 2 / 4 |
-| Crowns | 1 per city cell, 1 per 5 territory cells, Market +1, Monument +3 |
+| Crowns | 1 per 3 cells owned, heart +1, Market +1, Monument +3 |
+| Fallen land defence | 1 |
 
 A first market deck of 40 cards: Settle ×6, March ×10, Siege ×6, Market ×5,
 Walls ×5, Barracks ×4, Monument ×4. When the deck runs out, the discarded row
 cards are shuffled back in.
 
 A rough first turn: collect 1/1/1 to reach 3 grain, 3 wood, 2 stone; place the
-opening Farm, Lumber camp and Quarry. From turn two a house collects about 9
-goods, enough for one or two cards; by the middle of a match, 15–20.
+opening Farm, Lumber camp and Quarry, and hold the banner card. From turn two
+a house collects about 8 goods; 30–40 by the middle of a match and 50 or more
+near the end, by which time a house has 25–50 districts, a basic card costs
+10–20 goods, and most turns play a market card or two. Growth is then bounded
+by goods rather than by the play cap: a house places one or two districts a
+turn, and about a quarter of the valley is still open at round 20 before
+Settles and war are counted. These figures come from a growth-only simulation
+of the rules (basic districts only, no war, no market cards) and are the
+baseline that playtesting corrects. Two things to watch in that data: the seat
+bonus compounds, so the last seat may end up well ahead rather than level, and
+if growth feels slow the first lever is the price step (every 5 districts),
+not the play cap.
 
 ---
 
@@ -607,6 +664,13 @@ goods, enough for one or two cards; by the middle of a match, 15–20.
 - **Units on the map.** Armies as pieces that walk, need supply and stack are
   the road to a wargame nobody can learn on a phone. An army is a card played
   on a cell.
+- **Crowns per city cell.** Scoring every district as a crown makes the best
+  last rounds a paving exercise — cover every owned cell with districts — and
+  makes taking a cell worth a fraction of building one, so nobody attacks. Land
+  scores; districts are how you get land.
+- **Unlimited plays per turn.** A basic district pays for itself in one round,
+  so without a cap income doubles every two rounds, the valley is full by round
+  six and a late turn is fifty taps. Three plays a turn.
 
 ---
 
@@ -617,8 +681,10 @@ goods, enough for one or two cards; by the middle of a match, 15–20.
   Revisit once there is play data on runaway leaders.
 - **Cut-off land.** Whether territory cells cut off from all of their owner's
   cities should do anything (yield nothing, defend at 0). Simple for now: no.
-- **City size limits.** Whether a city's districts should cost more as it grows,
-  to push houses into founding new cities.
+- **Per-city growth price.** The rising basic price (§6.1) counts a house's
+  districts, because the price is paid when the card is bought and a basic card
+  is not yet tied to a city. A price per city would push harder toward founding
+  new cities; revisit if play shows one blob city is always best.
 - **Water.** Whether water cells should be ownable (for a Harbour card) or stay
   outside every border.
 - **Pricing.** Premium and offline like LumaVale, or free with a paid unlock once
@@ -630,11 +696,16 @@ goods, enough for one or two cards; by the middle of a match, 15–20.
 ## 17. Risks
 
 - **Runaway leader.** Land gives goods gives cards gives land. Fixed rounds,
-  basic piles at a fixed price, defence that rises with city size and the seat
-  bonus are the first answers; play data decides whether more is needed (§16).
-- **A dull middle.** If the board fills and nobody can afford to attack, the
-  last ten rounds are only building. March must stay cheap enough that borders
-  keep moving.
+  three plays a turn, the rising basic price and the seat bonus are the first
+  answers; play data decides whether more is needed (§16).
+- **A dull end.** Once the board is full, war is the main way to gain crowns.
+  If Walls and terrain make every border too dear to attack, the last rounds
+  are only Monuments. March and Siege must stay priced so that a border with no
+  Walls is always worth taking.
+- **Goods that mean nothing.** With three plays a turn a rich house may hold
+  more goods than it can ever spend. The rising basic price soaks some up;
+  if goods still pile up, add sinks (a card that costs goods to hold, or a
+  Monument whose price rises) before touching the cap.
 - **Bots that read as random.** Temperaments must be visible in play, or a
   capture feels like bad luck rather than a rival's character.
 - **Readability at 12 px.** Four house colours over four terrains on a phone
@@ -661,11 +732,13 @@ tests.
 **Done when:** the app boots to a main menu and CI is green.
 
 ### Phase 1 — The rules core
-- `Board`, reach, claiming, cities, districts, yields, turns, end turn.
+- `Board`, reach, claiming, cities, districts, yields, turns, the play cap,
+  end turn, crowns.
 - A match as header + log, with replay.
 - Tests: the reach rule matches `buildRadiusCellPath`; claimed land never changes
-  owner by growth; yields count only own plain territory; replaying a log gives
-  the same state on the VM and in a browser.
+  owner by growth; yields count only own plain territory; a fourth play in a
+  turn is refused; crowns count owned cells; replaying a log gives the same
+  state on the VM and in a browser.
 
 ### Phase 2 — The board on screen
 - Board generator with fair starts; `BoardWorld`; territory, city and yield
@@ -674,12 +747,13 @@ tests.
 - Readability check on a real phone.
 
 ### Phase 3 — Market and cards
-- The row, the deck, the PRNG, refill at end of turn, trading, the hand cap.
+- The row, the deck, the PRNG, refill at end of turn, trading, the hand cap,
+  the rising basic price, banner cards.
 - The hand bar and the market panel; arming, offered cells and previews.
 
 ### Phase 4 — War
 - March and Siege, defence, Walls and Barracks, captures, heart capture,
-  elimination.
+  elimination and fallen land.
 
 ### Phase 5 — Bots
 - Turn search and the three temperaments; bot turns off the UI thread if
