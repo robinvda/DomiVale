@@ -1,0 +1,11 @@
+name: domivale_rules
+description: The rules of DomiVale - board, match state, actions, cards and bots - as pure Dart, so the same code runs in the game, in tests and on a server.
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.0

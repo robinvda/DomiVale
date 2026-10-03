@@ -1,0 +1,105 @@
+part of 'match_state.dart';
+
+/// State + action → state, or a refusal.
+///
+/// Every action is validated here and nowhere else. The game asks the rules
+/// what is legal and sends an action; it never changes state on its own.
+extension MatchStateActions on MatchState {
+  /// Applies [action] for the house whose turn it is. Returns null when it
+  /// was done, or why it was not - in which case nothing changed.
+  Refusal? apply(Action action) {
+    if (isOver) return Refusal.matchOver;
+    switch (action) {
+      case BuyBasic(:final kind):
+        return _buyBasic(kind);
+      case PlayCard(:final handIndex, :final cell):
+        return _playCard(handIndex, cell);
+      case EndTurn():
+        _endTurn();
+        return null;
+    }
+  }
+
+  Refusal? _buyBasic(CardKind kind) {
+    final house = currentHouse;
+    if (!kind.isBasic) return Refusal.notABasicCard;
+    if (house.hand.length >= Rules.handCap) return Refusal.handFull;
+    final price = basicPriceFor(house.seat);
+    if (!house.goods.covers(price)) return Refusal.cannotAfford;
+    house.goods -= price;
+    house.hand.add(kind);
+    return null;
+  }
+
+  Refusal? _playCard(int handIndex, Cell cell) {
+    final house = currentHouse;
+    if (handIndex < 0 || handIndex >= house.hand.length) {
+      return Refusal.noSuchCard;
+    }
+    if (playsLeft == 0) return Refusal.noPlaysLeft;
+    final kind = house.hand[handIndex];
+    final refusal = _placementRefusal(kind, cell);
+    if (refusal != null) return refusal;
+
+    house.hand.removeAt(handIndex);
+    playsLeft--;
+    if (kind.isDistrict) {
+      _placeDistrict(_cityToGrow(house.seat, cell)!, cell, kind);
+    } else if (kind == CardKind.settle) {
+      _foundCity(house.seat, cell);
+    }
+    return null;
+  }
+
+  /// Why the current house could not play [kind] on [cell], or null if it
+  /// could. Shared by playing and by the offered-cells query, so what the
+  /// game highlights is exactly what the rules accept.
+  Refusal? _placementRefusal(CardKind kind, Cell cell) {
+    final seat = currentSeat;
+    if (!board.contains(cell)) return Refusal.cellOutsideBoard;
+    if (!board.terrainAt(cell).isLand) return Refusal.notLand;
+    if (kind.isDistrict) {
+      if (ownerOf(cell) != seat) return Refusal.cellNotYours;
+      if (isCityCell(cell)) return Refusal.cellIsCity;
+      if (_cityToGrow(seat, cell) == null) return Refusal.notTouchingYourCity;
+      return null;
+    }
+    if (kind == CardKind.settle) {
+      final owner = ownerOf(cell);
+      if (owner != MatchState.noHouse && owner != seat) {
+        return Refusal.cellNotYours;
+      }
+      for (final near in cell.cellsWithinReach(Rules.settleDistance)) {
+        if (isCityCell(near)) return Refusal.tooCloseToACity;
+      }
+      return null;
+    }
+    // Military cards have no targets in these rules yet: war is Phase 4 of
+    // the roadmap in DESIGN.md.
+    return Refusal.notATarget;
+  }
+
+  /// The city of [seat] a district on [cell] would join: the one with the
+  /// lowest id among those with a cell touching [cell], or null if none.
+  City? _cityToGrow(int seat, Cell cell) {
+    City? found;
+    for (final beside in cell.touching) {
+      final city = cityAt(beside);
+      if (city == null || city.owner != seat) continue;
+      if (found == null || city.id < found.id) found = city;
+    }
+    return found;
+  }
+
+  /// Passes the turn to the next house. When every house has played, the
+  /// round ends and the next one starts one seat later; after the last round
+  /// the match is over and nothing more is collected.
+  void _endTurn() {
+    turnInRound++;
+    if (turnInRound == houses.length) {
+      turnInRound = 0;
+      round++;
+    }
+    if (!isOver) _beginTurn();
+  }
+}

@@ -1,0 +1,79 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  rules:
+    name: Rules package (VM and browser)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/domivale_rules
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: dart pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+        continue-on-error: true
+
+      - name: Run analyzer
+        run: dart analyze --fatal-infos
+
+      - name: Run tests on the VM
+        run: dart test
+
+      # The rules must replay a match to the same state in a browser as on
+      # the VM, since a web client and a server will both run them. The
+      # runner image ships Chrome.
+      - name: Run tests in a browser
+        run: dart test -p chrome
+
+  game:
+    name: Game (analyze and test)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      # The default GITHUB_TOKEN cannot clone a second private repository, so
+      # vale_engine needs its own read-only deploy key: add the public half to
+      # the engine repository and store the private half as this secret.
+      - name: Load vale_engine deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VALE_ENGINE_DEPLOY_KEY }}
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+        continue-on-error: true
+
+      - name: Run analyzer
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test

@@ -1,0 +1,43 @@
+name: domivale
+description: A small, turn-based kingdom game where the way you grow your city is the way you draw your border
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Game engine
+  flame: ^1.37.0
+  # Shared engine (game loop, camera, terrain grid and rendering, grid
+  # targeting and previews, gestures, theme, save slots). Private repository:
+  # CI loads a deploy key before `pub get`. For local work against a sibling
+  # checkout, see pubspec_overrides.yaml (untracked).
+  vale_engine:
+    git:
+      url: git@github.com:robinvda/ValeEngine.git
+      ref: main
+
+  # The rules of the game: board, match state, actions, cards, bots. Pure
+  # Dart, so the same code runs in the game, in tests and later on a server.
+  domivale_rules:
+    path: packages/domivale_rules
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Variable.ttf
+    - family: NunitoSans
+      fonts:
+        - asset: assets/fonts/NunitoSans-Variable.ttf

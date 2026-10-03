@@ -156,25 +156,31 @@ every renderer culls to the visible rect.
 
 ### 3.2 Project structure
 
+What exists is marked; the rest is where the later phases put things.
+
 ```
 packages/domivale_rules/
 ├── lib/
+│   ├── rules.dart                # every tuned number (§13), in one place   ✓
 │   ├── board/
-│   │   ├── board.dart            # 22–32 cells square: terrain kind and height, immutable
-│   │   ├── cell.dart             # a coordinate, and the reach rule (§4.2)
-│   │   └── terrain_kind.dart     # meadow, forest, hills, water → what it yields
+│   │   ├── board.dart            # a square of cells: terrain kind and height, immutable   ✓
+│   │   ├── cell.dart             # a coordinate, touching, and the reach rule (§4.2)   ✓
+│   │   └── terrain_kind.dart     # meadow, forest, hills, water → what it yields   ✓
 │   ├── match/
-│   │   ├── match.dart            # header + action log
-│   │   ├── match_state.dart      # houses, cities, ownership, goods, hands, market, round
-│   │   ├── house.dart            # one player or bot: colour, goods, hand, seat
-│   │   ├── city.dart             # a heart and its districts
-│   │   ├── action.dart           # buy, play, trade, end turn — the whole vocabulary
-│   │   ├── apply.dart            # state + action → state, or a refusal
-│   │   └── scoring.dart          # crowns
+│   │   ├── match.dart            # header + action log   ✓
+│   │   ├── match_state.dart      # houses, cities, ownership, goods, hands, round   ✓
+│   │   ├── apply.dart            # state + action → state, or a refusal (a part of match_state)   ✓
+│   │   ├── scoring.dart          # crowns and standings   ✓
+│   │   ├── action.dart           # buy, play, end turn, and every refusal   ✓
+│   │   ├── goods.dart            # grain, wood, stone   ✓
+│   │   ├── banner.dart           # builder, expander, warlord and their cards   ✓
+│   │   ├── house_setup.dart      # one house before the match: banner, heart, opening choice   ✓
+│   │   ├── house.dart            # one player or bot: goods, hand, renown   ✓
+│   │   └── city.dart             # a heart and its districts   ✓
 │   ├── cards/
-│   │   ├── card_kind.dart        # the table in §6
-│   │   ├── market.dart           # the row, the basic piles, the deck and its refill
-│   │   └── prng.dart             # the deterministic shuffle
+│   │   ├── card_kind.dart        # the table in §6   ✓
+│   │   ├── prng.dart             # the deterministic shuffle   ✓
+│   │   └── market.dart           # the row, the basic piles, the deck and its refill
 │   ├── war/
 │   │   └── defence.dart          # what a cell needs to be taken (§5)
 │   └── bots/
@@ -183,8 +189,8 @@ packages/domivale_rules/
 └── test/
 
 lib/
-├── main.dart
-├── app_info.dart
+├── main.dart                     ✓
+├── app_info.dart                 ✓
 ├── game/
 │   ├── domivale_game.dart        # DomiValeGame extends ValeGame
 │   ├── match_controller.dart     # holds the Match, applies actions, runs bot turns
@@ -199,13 +205,14 @@ lib/
 │       ├── yield_renderer.dart       # yield icons on cells (zoomed, or while armed)
 │       └── preview_renderer.dart     # what the armed card would do here
 ├── ui/
+│   ├── main_menu_screen.dart     ✓
 │   ├── hud.dart                  # goods, crowns, round
 │   ├── hand_bar.dart             # the hand along the foot
 │   ├── market_panel.dart         # the row and the basic piles
 │   └── match_end_panel.dart
 ├── persistence/
 └── theme/
-    └── game_palette.dart         # house colours, district colours
+    └── game_palette.dart         # house colours   ✓
 ```
 
 ---
@@ -1018,7 +1025,7 @@ numbers depend on the rules more than on the players.
 Each phase ends with something that can be played or tested, and ships its own
 tests.
 
-### Phase 0 — Project setup
+### Phase 0 — Project setup ✓
 - `flutter create` for android, ios, web, macos, windows, linux; portrait-first.
 - `vale_engine` as a git dependency; untracked `pubspec_overrides.yaml`.
 - `packages/domivale_rules` as a pure Dart package and a path dependency.
@@ -1028,7 +1035,11 @@ tests.
 
 **Done when:** the app boots to a main menu and CI is green.
 
-### Phase 1 — The rules core
+**Done.** The menu has Skirmish, Daily board and Settings, none of them
+wired yet. The house colours are tested for L\*a\*b\* distance against each
+other and against the four terrain colours.
+
+### Phase 1 — The rules core ✓
 - `Board` at the three sizes, reach, claiming, cities, districts, yields,
   turns, the play cap, the rotating first seat, end turn, crowns.
 - A match as header + log, with replay.
@@ -1038,6 +1049,14 @@ tests.
   own plain cells touching it; each round starts one seat later than the
   round before and wraps around; replaying
   a log gives the same state on the VM and in a browser.
+
+**Done.** Also in: the basic piles with their rising price, the hand cap,
+the opening hand with the chosen basic and the banner card, the Settle
+placement rule and its rising price, the standings with both tie-breaks, and
+the refusals as a vocabulary with a player-facing line each. Military cards
+are in the card table but have no target until Phase 4. The prices are the
+baseline measured in §13; the goods question in §16 is still open and only
+touches `rules.dart` and the card table when it is settled.
 
 ### Phase 2 — The board on screen
 - Board generator with fair starts; `BoardWorld`; territory, city and yield
