@@ -276,8 +276,9 @@ of it becomes yours.** That is the whole claiming rule.
 - The board fills up. With three cards a turn (§7.2), the rising price of
   growth (§6.1) and a board sized to the house count (§4.1), growth alone
   leaves about a third of the land open at round 10, a sixth at round 15 and
-  almost none at round 20, at every house count (§13); Settles from the row
-  and war use it up sooner. The last rounds are a contest over borders: land
+  almost none at round 20, at every house count (§13). With the row's
+  Settles and war it is gone by round 9 or 10 (§13), which §16 takes up.
+  The last rounds are a contest over borders: land
   then changes hands only by war, and a house grows upward — more districts on
   land it already holds. That arc, a race for open land and then a fight over
   it, is intended for every house count.
@@ -704,8 +705,9 @@ basic districts and their rising price, the play cap, the hand cap, bank
 trading, the rotating first seat, the opening hand and banner cards, Monument
 crowns, renown and the start-of-turn rule for city cells. It has no market
 row, so no Settles, Walls, Barracks or Markets are ever bought, and no house
-attacks except a Warlord with its one Siege. It is the baseline that
-playtesting corrects, not a prediction of a real match. Averages over 48
+attacks except a Warlord with its one Siege. It is the growth-only baseline;
+where the match simulation further down disagrees with it, the match
+simulation is the better guess. Averages over 48
 boards with four houses; two and three houses, on their smaller boards, come
 out within a few percent of the same numbers.
 
@@ -751,9 +753,101 @@ What it says, and the numbers it set:
   buys a turn are what keep the game's strongest card in check; the deck mix
   is the lever if play shows too many or too few.
 
-Still to measure with a fuller model: how many Settles a house actually gets
-from the row in a four-house match, and whether the Warlord's temperament
-earns back in heart captures what it gives up in growth.
+**What the match simulation measures.** `tools/match_sim.py` plays the whole
+base set: the row and the deck with its discard recycling, every card in
+§6.2, two row buys and three plays a turn, trading, Walls and Barracks,
+stacked Sieges, terrain defence, the start-of-turn rule, abandonment, heart
+capture with the land that follows it, elimination and fallen land. Height is
+left out. The bots are greedy: they value each play in crowns, weighted by
+their temperament, and plan one turn ahead only to take a foothold beside a
+city cell. Averages over 48 four-house boards; two and three houses come out
+within a few percent unless said otherwise.
+
+| Round | Open land | Cells per house | Districts | Cities | Income | Goods held | Crowns | Tip districts |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 73% | 64 | 2.7 | 1.3 | 3 | 2 | 22 | 74% |
+| 5 | 41% | 138 | 11.7 | 1.9 | 22 | 3 | 50 | 36% |
+| 10 | 6% | 220 | 22.0 | 3.3 | 39 | 19 | 83 | 32% |
+| 15 | 0% | 233 | 30.1 | 4.8 | 52 | 114 | 95 | 37% |
+| 20 | 0% | 233 | 36.7 | 5.1 | 63 | 299 | 99 | 41% |
+
+A tip district is one that touches only one other cell of its city: the end
+of a line. Income is what the house collected that turn.
+
+What it says:
+
+- **The land is gone by round 9, not round 20.** The row's Settles do it.
+  The discard pile recycles the deck about four times in a match, so about
+  20 Settles reach the row per four-house game; each house plays 4 of them
+  and ends with 5 cities. More than one Settle per game is played in round 1,
+  because the starting goods and the first collection pay for a Settle that
+  sits in the opening row. Six copies in forty cards limit Settles per deck
+  cycle, not per match.
+- **The lead at round 10 decides the match.** The house leading at round 10
+  wins 87% of four-house matches (41 of 47 with a single leader) and the
+  winner was first at round 10 in 42 of 48 games. At round 5 the leader wins
+  57%. The margin of first over second at the end is 16 crowns on average.
+  With three and two houses the round-10 leader wins 83% and 87%.
+- **Hearts almost never fall.** 27 heart captures in 48 four-house games, 5
+  in 24 two-house games, and no house was ever eliminated. A turn that begins
+  with a rival heart reachable ends with that heart taken 3% of the time.
+  Footholds are retaken about 17 times a game. The limit is not the foothold
+  alone: a heart on hills behind Walls needs three Sieges in one hand, out of
+  six in the deck, with a hand cap of five.
+- **Goods bind for ten rounds and then mean nothing.** The bot's best option
+  was a buy it could not pay for in 97% of turns in rounds 1–5, 74% in
+  rounds 6–10, 15% in rounds 11–15 and 1% after that. Over the match a house
+  spends 52% of what it collects and ends holding about 300 goods, almost
+  five turns of income.
+- **Cities are lines, not blobs.** At round 20, 41% of districts are tips and
+  a district touches 1.8 other cells of its city on average; a straight line
+  scores 2, a filled block 3 to 4. The claim count rewards the tip of a line
+  and nothing rewards the block, so the greedy bots draw lines, and a player
+  who counts cells will too.
+- **Crowns at the end come from land.** Per house at round 20: land 77,
+  Monuments 12, hearts 5, Markets 4, renown under 1.
+- **Banners stay within 8 crowns of each other**, and the plain house does
+  best. The Warlord takes the fewest hearts (0.06 a match), so its temperament
+  does not earn back in captures what it gives up in growth — at least not
+  with a bot that plans one turn ahead.
+- **Walls cover about a third of all city cells by round 20.**
+
+Variants measured against that baseline, four houses, 48 boards each:
+
+| Variant | Land under 10% at round | Round-10 leader wins | Heart captures / 48 games | Tip districts, round 20 | Goods held, round 20 |
+|---|---|---|---|---|---|
+| Baseline, the rules as written | 9.4 | 87% | 27 | 41% | 299 |
+| Every card's price rises with the step | 14.6 | 84% | 0 | 22% | 21 |
+| +1 defence on a captured cell until its taker's next turn | 9.4 | 85% | 23 | 41% | 299 |
+| Renown for each abandoned district as well | 9.4 | 91% | 29 | 41% | 302 |
+| Districts claim reach 2, hearts reach 3 | 12.0 | 71% | 21 | 34% | 236 |
+| 1 crown per 4 cells, renown 2 per district and 5 per heart | 9.5 | 75% | 33 | 42% | 311 |
+
+What the variants say:
+
+- **Raising every price with the step overshoots.** Goods then bind in 98% of
+  turns to the very end, a house buys about ten row cards in a whole match
+  instead of thirty, Monuments fall to 4 crowns a house and no heart ever
+  falls. A gentler scale, or a scale on printed price rather than a flat
+  step, is the thing to try; the lever works, the setting is wrong.
+- **A held bonus on captured cells changes nothing.** Footholds are still
+  retaken 16 times a game, with two cards instead of one. Heart capture is
+  limited by Sieges in hand, not by the foothold.
+- **Renown for abandoned districts does not change city shape**, because the
+  bots do not plan around the threat; renown per house rises from 0.7 to 1.1.
+  Whether a human changes shape under that rule is a playtest question.
+- **Reach 2 for districts is the one change that moves several numbers at
+  once.** Land lasts to round 12, the round-10 leader wins 71% instead of
+  87%, tips fall to 34%, and a house ends with 6 cities. Its cost is a slower
+  opening: 18 crowns at round 1 instead of 22.
+- **Scoring land at 1 per 4 with heavier renown** brings the round-10 leader
+  to 75% and heart captures to 33, with land at 58 of 82 crowns.
+
+What the bots cannot show: a house that saves Sieges for a heart over several
+turns, a defender that walls a heart before the foothold is taken, or a player
+who grows a block because a Warlord sits next door. The heart numbers and the
+shape numbers can move either way with humans; the land, goods and lead
+numbers depend on the rules more than on the players.
 
 ---
 
@@ -838,6 +932,21 @@ earns back in heart captures what it gives up in growth.
 
 ## 16. Deferred decisions
 
+- **Goods after round 10 — decided before Phase 1.** In the match simulation
+  goods bind for ten rounds and then pile up to five turns of income unspent
+  (§13); the price step on basics alone does not reach market cards. Grain and
+  wood are also priced as a pair everywhere, so they act as one good.
+  Candidates: a gentler price scale on every card (the flat step on every
+  card overshoots, §13), a storage cap per city, and a price table that
+  splits grain from wood so the terrain around a start shapes what a house
+  buys. Prices live in the rules package, so this is settled before it is
+  written.
+- **Settles per match.** The discard pile recycles the deck, so six Settles
+  in forty cards means about twenty Settles a match and five cities a house,
+  with the land gone by round 9 (§13). Candidates: Settles that leave the
+  game when played instead of going to the discard pile, fewer copies, or
+  districts that claim reach 2 while hearts keep reach 3, which in the
+  simulation also loosens the round-10 lead and thins the lines less (§13).
 - **A card that waits gets cheaper.** Market row cards losing 1 of their price
   for every round they stay unbought — a common board-game catch-up rule.
   Revisit once there is play data on runaway leaders.
@@ -867,7 +976,10 @@ earns back in heart captures what it gives up in growth.
 
 - **Runaway leader.** Land gives goods gives cards gives land. Fixed rounds,
   three plays a turn, the rising basic and Settle prices and the rotating first
-  seat are the first answers; play data decides whether more is needed (§16).
+  seat are the first answers. In the match simulation the house leading at
+  round 10 wins 87% of matches (§13), so the second half is a tie-breaker
+  unless something changes; reach-2 districts and lighter land scoring each
+  brought that to the low seventies. Play data decides which (§16).
 - **A dull end.** Once the board is full, the plays are the scarce thing and
   what matters is crowns per play. A Monument in open land, a Siege on a
   district with its renown, and a two-turn approach to a heart are meant to be
@@ -880,12 +992,17 @@ earns back in heart captures what it gives up in growth.
   could both pull ahead of a third. Watch three- and four-house data for it;
   the fix would be renown only for a district the owner placed before the
   attacker's previous turn.
-- **Goods that mean nothing.** With three plays a turn a rich house may hold
-  more goods than it can ever spend. The price step of 3 keeps growth bound
-  by goods in the simulation (§13), where a house holds about a third of a
-  turn's income unspent; market cards at their printed prices will loosen
-  that in a real match. If goods pile up, add sinks (a card that costs goods
-  to hold, or a Monument whose price rises) before touching the cap.
+- **Goods that mean nothing.** With three plays a turn a rich house holds
+  more goods than it can ever spend. The growth-only simulation kept goods
+  binding with the price step; with the market modelled they bind for ten
+  rounds and then pile up to five turns of income (§13). Decided before
+  Phase 1 (§16); the cap stays.
+- **Hearts that never fall.** The heart capture is the game's big swing and
+  in the match simulation it happens in fewer than half of four-house games
+  and never eliminates anyone (§13). A heart on hills behind Walls needs
+  three Sieges in one hand. If play agrees, the levers are Siege strength or
+  stacking, the Walls bonus, the Siege count in the deck, and a Barracks that
+  counts for more against hearts.
 - **Bots that read as random.** Temperaments must be visible in play, or a
   capture feels like bad luck rather than a rival's character.
 - **Readability at 12 px.** Four house colours over four terrains on a phone
