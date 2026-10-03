@@ -37,6 +37,24 @@ abstract final class GamePalette {
   /// How strong the line along a territory's border is.
   static const double borderStrength = 0.85;
 
+  /// How much of a house's colour the land an armed card would claim is
+  /// washed with, on top of the territory it joins.
+  static const double claimPreviewWash = 0.35;
+
+  /// The icon in the middle of a city cell. Not quite white, so it sits on
+  /// its cell rather than glaring off it.
+  static const cellIcon = Color(0xE6FFFFFF);
+
+  /// The yield glyph on a plain cell, faint enough to read as texture.
+  static const yieldIcon = Color(0x66FFFFFF);
+
+  /// The number on a previewed cell: what a district there would yield.
+  static const previewText = Color(0xFFFAF8F3);
+  static const previewTextShadow = Color(0xCC1A1A1E);
+
+  /// The ring around a cell the player is reading.
+  static const inspectRing = Color(0xFFFFD166);
+
   // ── Crowns ───────────────────────────────────────────────────────────────
 
   /// The primary accent: crowns, the score, the thing the game is about.

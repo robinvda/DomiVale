@@ -192,27 +192,31 @@ lib/
 ├── main.dart                     ✓
 ├── app_info.dart                 ✓
 ├── game/
-│   ├── domivale_game.dart        # DomiValeGame extends ValeGame
-│   ├── match_controller.dart     # holds the Match, applies actions, runs bot turns
+│   ├── domivale_game.dart        # DomiValeGame extends ValeGame   ✓
+│   ├── match_controller.dart     # holds the Match, applies actions, runs bot turns   ✓
+│   ├── match_setup.dart          # a skirmish's header: board, dealt seats, opening choices   ✓
 │   ├── turn_recap.dart           # replays what rivals did since your last turn
-│   └── input_controller.dart     # armed card → offered cells → tap to play, undo
+│   └── input_controller.dart     # armed card → offered cells → tap to play, undo   ✓
 ├── world/
-│   ├── board_world.dart          # BoardWorld extends TerrainWorld, from a Board
-│   ├── board_generator.dart      # noise → terrain, heights, start positions
+│   ├── board_world.dart          # BoardWorld extends TerrainWorld, from a Board   ✓
+│   ├── board_generator.dart      # noise → terrain, heights, start positions   ✓
 │   └── rendering/
-│       ├── territory_renderer.dart   # house colour fills and borders
-│       ├── city_renderer.dart        # hearts and districts
-│       ├── yield_renderer.dart       # yield icons on cells (zoomed, or while armed)
-│       └── preview_renderer.dart     # what the armed card would do here
+│       ├── territory_renderer.dart   # house colour fills and borders   ✓
+│       ├── city_renderer.dart        # hearts and districts   ✓
+│       ├── yield_renderer.dart       # yield icons on cells (zoomed, or while armed)   ✓
+│       └── preview_renderer.dart     # what the armed card would do here   ✓
 ├── ui/
 │   ├── main_menu_screen.dart     ✓
+│   ├── setup_screen.dart         # houses and banners for a skirmish   ✓
+│   ├── game_screen.dart          # the board, the HUD, the handover between turns   ✓
 │   ├── hud.dart                  # goods, crowns, round
-│   ├── hand_bar.dart             # the hand along the foot
+│   ├── hand_bar.dart             # the hand along the foot   ✓
 │   ├── market_panel.dart         # the row and the basic piles
 │   └── match_end_panel.dart
 ├── persistence/
 └── theme/
-    └── game_palette.dart         # house colours   ✓
+    ├── game_palette.dart         # house colours   ✓
+    └── district_look.dart        # colour and icon per card kind, the heart, the goods   ✓
 ```
 
 ---
@@ -1058,11 +1062,21 @@ are in the card table but have no target until Phase 4. The prices are the
 baseline measured in §13; the goods question in §16 is still open and only
 touches `rules.dart` and the card table when it is settled.
 
-### Phase 2 — The board on screen
+### Phase 2 — The board on screen ✓
 - Board generator with fair starts; `BoardWorld`; territory, city and yield
   renderers.
 - Play the opening hand and basic piles by hand, hot-seat, no bots.
 - Readability check on a real phone.
+
+**Done, except the phone.** Skirmish opens a setup card (2–4 houses, a
+banner each), the generator draws the valley and places fair hearts, and the
+match is played hot-seat with a handover card between turns so no hand is
+shown to a rival. Arm a card, see its offered cells and the land it would
+claim, tap to play; hold a cell to read it; buy from the piles; undo; end
+turn; a standings card at round 20. The house's opening basic is chosen from
+its land (whichever of wood and stone there is more of), since the market
+panel that lets the player choose is Phase 3. The readability check at 12 px
+on a real phone has not been done and is the gate before Phase 3.
 
 ### Phase 3 — Market and cards
 - The row, the deck, the discard pile, the PRNG, refill at end of turn,

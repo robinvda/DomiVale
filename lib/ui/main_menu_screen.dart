@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:vale_engine/theme/brand_theme.dart';
+import 'package:vale_engine/ui/fade_page_route.dart';
 import 'package:vale_engine/ui/menu_background_painter.dart';
 
 import '../app_info.dart';
 import '../theme/game_palette.dart';
+import 'setup_screen.dart';
 
 /// The screen the app opens on.
 class MainMenuScreen extends StatefulWidget {
@@ -45,6 +47,12 @@ class _MainMenuScreenState extends State<MainMenuScreen>
       );
   }
 
+  void _openSkirmish() {
+    Navigator.of(context).push(
+      FadePageRoute<void>(child: const SetupScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,7 +80,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
                       _MenuButton(
                         label: 'Skirmish',
                         colour: GamePalette.crimson,
-                        onPressed: _notReadyYet,
+                        onPressed: _openSkirmish,
                       ),
                       const SizedBox(height: 12),
                       _MenuButton(

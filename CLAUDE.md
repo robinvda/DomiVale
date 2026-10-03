@@ -11,10 +11,10 @@ and LumaVale's setting, fonts and UI chrome.
 `DESIGN.md` holds the full design document, the starting numbers and the
 phased roadmap. This file holds the engineering rules.
 
-**Status: Phase 0 and Phase 1 done, Phase 2 next.** The app boots to a main
-menu. The rules core is written and tested: board, reach, claiming, cities,
-districts, yields, basic piles, turns, crowns, and a match as header plus log.
-Nothing is drawn on screen yet.
+**Status: Phases 0 to 2 done, Phase 3 next.** The rules core is written and
+tested, and a skirmish is played hot-seat on a generated board: arm a card,
+see what it would claim, tap to play, buy from the piles, undo, end turn.
+The readability check on a real phone (Phase 2's last item) is still to do.
 
 ## Engineering philosophy
 
@@ -94,6 +94,30 @@ pathfinding, no fog, no `TerrainPass`), is in `DESIGN.md` §2.
 `buildRadiusCellPath` matters twice: its distance rule is the rules' reach
 rule, and `test/world/reach_test.dart` checks the two agree; and called with
 radius 0 on every owned cell it outlines a territory.
+
+## The game layer
+
+- **`MatchController` is the only thing that changes the match.** It sends an
+  `Action` to the rules, appends it to the log when accepted, and notifies.
+  Undo truncates the log and replays. The Flame game, the renderers and the
+  HUD read `matches.state` and never hold a `MatchState` across a change -
+  undo replaces it.
+- **Renderers rebuild on events, never per frame.** `TerritoryRenderer` and
+  `PreviewRenderer` have a `refresh()` the game calls from one path
+  (`_matchChanged`) when the match, the armed card or the pointer changes.
+  `CityRenderer` and `YieldRenderer` read the state each frame but allocate
+  nothing: one pre-built path translated per cell, one `SpriteBatch` flush.
+- **One `IconAtlas` for the board**, slots addressed through `DistrictLook`:
+  card kinds, then the heart, then the goods. Baked on the first frame that
+  wants it (the icon font is not loaded at construction).
+- **The screen never reshapes the subtree around the `GameWidget`**, and
+  nothing the HUD reads touches what `onLoad` makes: `boardReady` gates the
+  camera, and the hand and panel read the controller, which exists first.
+- **The HUD tells the game what it covers** (`hudInsets`), so the fit zoom is
+  a fit of the free part of the viewport. The camera is placed once, on the
+  first resize, and is then the player's.
+- **Flutter's `Banner` widget collides with the rules' `Banner`.** Import
+  `material.dart` with `hide Banner` wherever both are in scope.
 
 ## Performance
 
