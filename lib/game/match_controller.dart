@@ -10,11 +10,17 @@ import 'package:flutter/foundation.dart';
 /// by hand, so what the player sees after an undo is exactly what the rules
 /// say.
 class MatchController extends ChangeNotifier {
-  MatchController(this.match)
+  MatchController(this.match, {this.botSeats = const {}})
       : state = match.replay(),
         _turnStart = match.log.length;
 
   final Match match;
+
+  /// The seats played by bots. Every other seat is a person at the screen.
+  final Set<int> botSeats;
+
+  /// Whether the house whose turn it is is a bot.
+  bool get isBotTurn => !state.isOver && botSeats.contains(state.currentSeat);
 
   /// The state the log leads to. Replaced on undo, so hold the controller
   /// rather than this.
@@ -48,4 +54,37 @@ class MatchController extends ChangeNotifier {
 
   /// Ends the turn, after which nothing in it can be undone.
   bool endTurn() => apply(const EndTurn()) == null;
+
+  /// Plays the current bot's whole turn, one action at a time through the
+  /// rules, and ends it. Answers how many actions it took, or 0 when it is
+  /// not a bot's turn.
+  ///
+  /// Listeners are told once at the end rather than per action: a bot turn
+  /// is one move to the player, and the recap is what shows it in steps.
+  int playBotTurn() {
+    if (!isBotTurn) return 0;
+    final bot = Bot.forBanner(state.currentHouse.setup.banner);
+    var count = 0;
+    while (true) {
+      final action = bot.nextAction(state);
+      final refusal = state.apply(action);
+      if (refusal != null) {
+        throw StateError('the bot asked for $action and was refused: '
+            '${refusal.name}');
+      }
+      match.append(action);
+      count++;
+      if (action is EndTurn || state.isOver) break;
+    }
+    _turnStart = match.log.length;
+    notifyListeners();
+    return count;
+  }
+
+  /// Plays every bot turn until a person is to play or the match is over.
+  void playBotTurns() {
+    while (isBotTurn) {
+      playBotTurn();
+    }
+  }
 }

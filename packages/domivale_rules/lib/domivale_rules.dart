@@ -8,6 +8,8 @@ library;
 export 'board/board.dart';
 export 'board/cell.dart';
 export 'board/terrain_kind.dart';
+export 'bots/bot.dart';
+export 'bots/temperament.dart';
 export 'cards/card_kind.dart';
 export 'cards/market.dart';
 export 'cards/prng.dart';

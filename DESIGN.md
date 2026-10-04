@@ -184,8 +184,8 @@ packages/domivale_rules/
 │   ├── war/
 │   │   └── defence.dart          # defence, strength, pressure, captures (§5; a part of match_state)   ✓
 │   └── bots/
-│       ├── bot.dart              # chooses a turn's actions
-│       └── temperament.dart      # builder, expander, warlord weights
+│       ├── bot.dart              # chooses a turn's actions, one at a time   ✓
+│       └── temperament.dart      # builder, expander, warlord weights   ✓
 └── test/
 
 lib/
@@ -1121,10 +1121,22 @@ early when one house has a heart left. The board preview shows strength
 against defence on the pointed cell and rings the districts a capture would
 cut off; holding a cell shows its defence.
 
-### Phase 5 — Bots
+### Phase 5 — Bots ✓
 - Turn search and the three temperaments; bot turns off the UI thread if
   needed.
 - **Done when:** a skirmish against three bots plays from start to end.
+
+**Done, on the main thread.** The bot is the greedy one `tools/match_sim.py`
+was measured with, ported to the rules package: it values every play, buy
+and attack open to it in crowns per play, weighted by its temperament, and
+takes the best one step at a time until nothing is worth more than a tenth
+of a crown. It trades toward a card it wants, buys cards to hold or to deny,
+and attacks only what its hand can finish this turn. It is stateless and
+walks the board in row order, so a match of bots replays from its seed. A
+four-house bot match takes a few seconds on the VM; whether a bot turn
+needs an isolate on a phone is measured in Phase 6, where the recap gives
+it time to think behind. The setup card marks each house You or Bot, so a
+skirmish against three bots plays from start to end.
 
 ### Phase 6 — A whole match
 - Crowns in the HUD, the end of match panel, the turn recap.

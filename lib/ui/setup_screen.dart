@@ -30,16 +30,24 @@ class _SetupScreenState extends State<SetupScreen> {
     Banner.builder,
   ];
 
+  /// Which houses a bot plays. The first is the player's by default; a
+  /// house with nobody at the screen is a bot.
+  final List<bool> _bots = [false, true, true, true];
+
   void _start() {
-    final header = buildMatch(
+    final setup = buildMatch(
       houses: [
         for (var i = 0; i < _houses; i++)
-          HouseChoice(name: houseNames[i], banner: _banners[i]),
+          HouseChoice(
+            name: houseNames[i],
+            banner: _banners[i],
+            isBot: _bots[i],
+          ),
       ],
       seed: Random().nextInt(1 << 30),
     );
     Navigator.of(context).pushReplacement(
-      FadePageRoute<void>(child: GameScreen(header: header)),
+      FadePageRoute<void>(child: GameScreen(setup: setup)),
     );
   }
 
@@ -57,7 +65,7 @@ class _SetupScreenState extends State<SetupScreen> {
                 children: [
                   const PaperHeading(
                     title: 'A skirmish',
-                    subtitle: 'Every house is played at this screen, in turn.',
+                    subtitle: 'You against the bots, or friends at one screen.',
                   ),
                   const SizedBox(height: 18),
                   const _SectionLabel('Houses'),
@@ -111,6 +119,11 @@ class _SetupScreenState extends State<SetupScreen> {
                             selected: _banners[i] == banner,
                             onTap: () => setState(() => _banners[i] = banner),
                           ),
+                        _Choice(
+                          label: _bots[i] ? 'Bot' : 'You',
+                          selected: !_bots[i],
+                          onTap: () => setState(() => _bots[i] = !_bots[i]),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 14),

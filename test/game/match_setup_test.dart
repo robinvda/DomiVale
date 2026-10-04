@@ -4,15 +4,21 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('a skirmish is a board for its houses with seats dealt by the seed', () {
-    final header = buildMatch(
+    final setup = buildMatch(
       houses: const [
         HouseChoice(name: 'Hill House', banner: Banner.builder),
-        HouseChoice(name: 'Lake House', banner: Banner.expander),
-        HouseChoice(name: 'Wood House', banner: Banner.warlord),
+        HouseChoice(name: 'Lake House', banner: Banner.expander, isBot: true),
+        HouseChoice(name: 'Wood House', banner: Banner.warlord, isBot: true),
       ],
       seed: 11,
     );
+    final header = setup.header;
     expect(header.board.size, Rules.boardSize(3));
+    // The bots take the seats their houses were dealt.
+    expect(setup.botSeats, hasLength(2));
+    for (final seat in setup.botSeats) {
+      expect(header.houses[seat].name, isNot('Hill House'));
+    }
     expect(header.houses, hasLength(3));
     expect(header.houses.map((h) => h.name).toSet(),
         {'Hill House', 'Lake House', 'Wood House'});
@@ -37,7 +43,7 @@ void main() {
         HouseChoice(name: 'Wood House', banner: Banner.warlord),
       ],
       seed: 11,
-    );
+    ).header;
     expect(again.houses.map((h) => h.name).toList(),
         header.houses.map((h) => h.name).toList());
   });

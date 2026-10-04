@@ -7,7 +7,7 @@ import 'package:domivale_rules/domivale_rules.dart';
 import 'package:flutter/material.dart' hide Banner;
 import 'package:flutter_test/flutter_test.dart';
 
-MatchHeader _header() => buildMatch(
+MatchSetup _setup() => buildMatch(
       houses: const [
         HouseChoice(name: 'Hill House', banner: Banner.builder),
         HouseChoice(name: 'Lake House', banner: Banner.warlord),
@@ -20,7 +20,7 @@ void main() {
   // has not been drawn: Flame runs `onLoad` after the host has built its
   // widget tree. Nothing the HUD reads may reach for what `onLoad` makes.
   testWidgets('the screen builds before the board is ready', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: GameScreen(header: _header())));
+    await tester.pumpWidget(MaterialApp(home: GameScreen(setup: _setup())));
     expect(tester.takeException(), isNull);
     expect(find.byType(StatusPanel), findsOneWidget);
     expect(find.text('Take the turn'), findsOneWidget);
@@ -31,7 +31,7 @@ void main() {
   });
 
   testWidgets('and survives the board becoming ready under it', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: GameScreen(header: _header())));
+    await tester.pumpWidget(MaterialApp(home: GameScreen(setup: _setup())));
     for (var frame = 0; frame < 20; frame++) {
       await tester.pump(const Duration(milliseconds: 16));
       expect(tester.takeException(), isNull, reason: 'frame $frame');

@@ -121,6 +121,11 @@ class MatchState {
   /// turn began. Only these can be attacked this turn.
   Set<Cell> _cityTargetsAtTurnStart = const {};
 
+  /// The rival city cells the current house may attack this turn: those
+  /// that touched its land when the turn began.
+  Set<Cell> get cityTargetsAtTurnStart =>
+      Set.unmodifiable(_cityTargetsAtTurnStart);
+
   // ── Turn order ─────────────────────────────────────────────────────────
 
   /// Every house has played its last turn, or only one still has a heart.

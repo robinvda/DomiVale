@@ -4,10 +4,25 @@ import '../world/board_generator.dart';
 
 /// One house as the setup screen describes it, before seats are dealt.
 class HouseChoice {
-  const HouseChoice({required this.name, required this.banner});
+  const HouseChoice({
+    required this.name,
+    required this.banner,
+    this.isBot = false,
+  });
 
   final String name;
   final Banner banner;
+
+  /// Played by a bot rather than by a person at the screen.
+  final bool isBot;
+}
+
+/// A match as set up: its header, and which seats the bots take.
+class MatchSetup {
+  const MatchSetup({required this.header, required this.botSeats});
+
+  final MatchHeader header;
+  final Set<int> botSeats;
 }
 
 /// The names the houses go by, in the order they are handed out.
@@ -21,7 +36,7 @@ const List<String> houseNames = [
 /// Builds a match from what the setup screen chose: a board for the house
 /// count, seats dealt at random, and each house's opening choice made from
 /// the land around its heart.
-MatchHeader buildMatch({required List<HouseChoice> houses, required int seed}) {
+MatchSetup buildMatch({required List<HouseChoice> houses, required int seed}) {
   final generated = BoardGenerator.generate(houses: houses.length, seed: seed);
   final board = generated.board;
 
@@ -30,13 +45,19 @@ MatchHeader buildMatch({required List<HouseChoice> houses, required int seed}) {
   final order = List.generate(houses.length, (i) => i);
   Prng(seed).shuffle(order);
 
-  return MatchHeader(
-    board: board,
-    seed: seed,
-    houses: [
+  return MatchSetup(
+    header: MatchHeader(
+      board: board,
+      seed: seed,
+      houses: [
+        for (final (seat, index) in order.indexed)
+          _setupFor(houses[index], generated.hearts[seat], board),
+      ],
+    ),
+    botSeats: {
       for (final (seat, index) in order.indexed)
-        _setupFor(houses[index], generated.hearts[seat], board),
-    ],
+        if (houses[index].isBot) seat,
+    },
   );
 }
 

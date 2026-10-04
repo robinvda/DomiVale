@@ -8,6 +8,7 @@ import 'package:vale_engine/ui/world_gestures.dart';
 
 import '../game/domivale_game.dart';
 import '../game/match_controller.dart';
+import '../game/match_setup.dart';
 import '../theme/game_palette.dart';
 import 'hand_bar.dart';
 import 'hud/hud_widgets.dart';
@@ -29,13 +30,13 @@ import 'market_panel.dart';
 /// - **Nothing the HUD reads may touch what `onLoad` makes.** Every control
 ///   is on screen before the board exists.
 ///
-/// Hot-seat: every house is a person at this screen. Between turns a card
-/// over the board names the next house, so one player's hand is never shown
-/// to another.
+/// Every seat that is not a bot's is a person at this screen. Between turns
+/// a card over the board names the next house, so one player's hand is
+/// never shown to another; bot turns play out at once.
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key, required this.header});
+  const GameScreen({super.key, required this.setup});
 
-  final MatchHeader header;
+  final MatchSetup setup;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -56,8 +57,14 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-    _matches = MatchController(Match(widget.header));
+    _matches = MatchController(
+      Match(widget.setup.header),
+      botSeats: widget.setup.botSeats,
+    );
     _game = DomiValeGame(debugController: _debugController, matches: _matches);
+    // Bots ahead of the first person play at once. The recap that shows
+    // what they did is a later phase; for now the board simply shows it.
+    _matches.playBotTurns();
   }
 
   @override
@@ -113,6 +120,7 @@ class _GameScreenState extends State<GameScreen> {
     if (_game.endTurn()) {
       _handingOver = true;
       _marketOpen = false;
+      _matches.playBotTurns();
     }
     setState(() {});
   }

@@ -11,11 +11,11 @@ and LumaVale's setting, fonts and UI chrome.
 `DESIGN.md` holds the full design document, the starting numbers and the
 phased roadmap. This file holds the engineering rules.
 
-**Status: Phases 0 to 4 done, Phase 5 (bots) next.** The rules core, the
-market and war are written and tested, and a skirmish is played hot-seat on
-a generated board: arm a card, see what it would claim or take, tap to play,
-buy from the row and the piles, trade, undo, end turn. The readability check
-on a real phone (Phase 2's last item) is still to do.
+**Status: Phases 0 to 5 done, Phase 6 (a whole match: crowns in the HUD,
+the end panel, the turn recap) next.** The rules, the market, war and the
+bots are written and tested, and a skirmish against bots or friends plays
+from start to end on a generated board. The readability check on a real
+phone (Phase 2's last item) is still to do.
 
 ## Engineering philosophy
 
@@ -90,6 +90,15 @@ Rules that follow, each of which costs a bug when missed:
 - **A fallen house stays in the match's data.** Its seat keeps its cells
   (`isFallenLand`), its hand is emptied, `crownsOf` gives 0, and `_endTurn`
   skips it. Nothing removes a house from `houses`.
+- **The bot is stateless and asks for one action at a time.**
+  `Bot.nextAction(state)` values everything open to the current house and
+  answers the best action; `MatchController.playBotTurn` applies it and asks
+  again until `EndTurn`. No random numbers, row-order walks, strict `>` on
+  ties, so a bot match replays from its seed. The values are the ones
+  `tools/match_sim.py` was measured with; change them together or the
+  design's numbers stop describing the bots.
+- **A bot never asks for a refused action.** `playBotTurn` throws if the
+  rules refuse one, because that is a bug in the bot, not a result.
 - **One `Prng` per match, carried across every reshuffle.** `Market.start`
   seeds it from the header; recycling the discard uses the same generator, so
   the order after a reshuffle is as reproducible as the first deal. A header
@@ -130,6 +139,9 @@ radius 0 on every owned cell it outlines a territory.
   Undo truncates the log and replays. The Flame game, the renderers and the
   HUD read `matches.state` and never hold a `MatchState` across a change -
   undo replaces it.
+- **Bot turns run through the same controller**, in `playBotTurns`, which
+  the screen calls when it opens and after every human end-turn. Listeners
+  are told once per bot turn, not per action.
 - **Renderers rebuild on events, never per frame.** `TerritoryRenderer` and
   `PreviewRenderer` have a `refresh()` the game calls from one path
   (`_matchChanged`) when the match, the armed card or the pointer changes.
