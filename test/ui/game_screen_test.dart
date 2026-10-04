@@ -39,11 +39,6 @@ void main() {
     await tester.tap(find.text('Take the turn'));
     await tester.pump();
     expect(find.text('Take the turn'), findsNothing);
-    // A turn opens on the market.
-    expect(find.byType(MarketPanel), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.close));
-    await tester.pump();
-    expect(find.byType(MarketPanel), findsNothing);
 
     // A card is armed with a tap and disarmed with another.
     await tester.tap(find.byType(HandCardView).first);

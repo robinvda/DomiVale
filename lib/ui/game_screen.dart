@@ -223,12 +223,7 @@ class _GameScreenState extends State<GameScreen> {
                 if (!_handingOver) return const SizedBox.shrink();
                 return _Handover(
                   state: state,
-                  onTake: () => setState(() {
-                    _handingOver = false;
-                    // A turn opens on the market: what the row holds is the
-                    // first thing to read, and most turns start with a buy.
-                    _marketOpen = true;
-                  }),
+                  onTake: () => setState(() => _handingOver = false),
                 );
               },
             ),
