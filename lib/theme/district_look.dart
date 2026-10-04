@@ -37,25 +37,15 @@ class DistrictLook {
 
   static const IconData heartIcon = Icons.castle;
 
-  /// The glyph for each good, drawn on the land that yields it.
-  static IconData goodIcon(Good good) => switch (good) {
-        Good.grain => Icons.grass,
-        Good.wood => Icons.park,
-        Good.stone => Icons.landscape,
-      };
-
-  /// Every icon the board atlas bakes, in slot order: one per card kind, then
-  /// the heart, then one per good. [slotOf], [heartSlot] and [goodSlot]
-  /// address them.
+  /// Every icon the board atlas bakes, in slot order: one per card kind,
+  /// then the heart. [slotOf] and [heartSlot] address them.
   static List<IconData> get icons => [
         for (final kind in CardKind.values) of(kind).icon,
         heartIcon,
-        for (final good in Good.values) goodIcon(good),
       ];
 
   static int slotOf(CardKind kind) => kind.index;
   static int get heartSlot => CardKind.values.length;
-  static int goodSlot(Good good) => CardKind.values.length + 1 + good.index;
 
   static const List<DistrictLook> _looks = [
     // Farm: straw, and a tractor.

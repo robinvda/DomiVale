@@ -145,11 +145,13 @@ radius 0 on every owned cell it outlines a territory.
 - **Renderers rebuild on events, never per frame.** `TerritoryRenderer` and
   `PreviewRenderer` have a `refresh()` the game calls from one path
   (`_matchChanged`) when the match, the armed card or the pointer changes.
-  `CityRenderer` and `YieldRenderer` read the state each frame but allocate
-  nothing: one pre-built path translated per cell, one `SpriteBatch` flush.
+  `CityRenderer` reads the state each frame but allocates nothing: one pre-built path translated per cell, one `SpriteBatch` flush.
 - **One `IconAtlas` for the board**, slots addressed through `DistrictLook`:
-  card kinds, then the heart, then the goods. Baked on the first frame that
+  card kinds, then the heart. Baked on the first frame that
   wants it (the icon font is not loaded at construction).
+- **No glyph on terrain.** The colour says the kind; a glyph on every cell
+  read as clutter in play. What a cell is worth is shown only under an armed
+  card, by marking the cells that feed the pointed one.
 - **The screen never reshapes the subtree around the `GameWidget`**, and
   nothing the HUD reads touches what `onLoad` makes: `boardReady` gates the
   camera, and the hand and panel read the controller, which exists first.

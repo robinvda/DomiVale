@@ -45,8 +45,9 @@ abstract final class GamePalette {
   /// its cell rather than glaring off it.
   static const cellIcon = Color(0xE6FFFFFF);
 
-  /// The yield glyph on a plain cell, faint enough to read as texture.
-  static const yieldIcon = Color(0x66FFFFFF);
+  /// The mark on a cell that would feed the district under the pointer, or
+  /// score for the Monument there: the reason behind the number shown.
+  static const feedingMark = Color(0xFFF5E3A0);
 
   /// The number on a previewed cell: what a district there would yield, or
   /// what an army brings against the target.

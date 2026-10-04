@@ -16,7 +16,6 @@ import '../world/rendering/board_bounds_renderer.dart';
 import '../world/rendering/city_renderer.dart';
 import '../world/rendering/preview_renderer.dart';
 import '../world/rendering/territory_renderer.dart';
-import '../world/rendering/yield_renderer.dart';
 import 'input_controller.dart';
 import 'match_controller.dart';
 
@@ -47,7 +46,6 @@ class DomiValeGame extends ValeGame {
 
   late final TerritoryRenderer territoryRenderer;
   late final CityRenderer cityRenderer;
-  late final YieldRenderer yieldRenderer;
   late final PreviewRenderer previewRenderer;
 
   /// The board icons, baked once. Held by the game because it is the game's
@@ -90,16 +88,6 @@ class DomiValeGame extends ValeGame {
 
     territoryRenderer = TerritoryRenderer(matches: matches, tileSize: tileSize);
     world.add(territoryRenderer);
-
-    yieldRenderer = YieldRenderer(
-      matches: matches,
-      icons: boardIcons,
-      tileSize: tileSize,
-      visible: _visibleRect,
-      zoom: () => cameraController.zoom,
-      offered: () => input.offeredCells,
-    );
-    world.add(yieldRenderer);
 
     cityRenderer = CityRenderer(
       matches: matches,

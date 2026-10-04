@@ -41,6 +41,14 @@ class PreviewRenderer extends Component {
   /// saying.
   TextPainter? _yield;
 
+  /// The cells that would feed a gathering district on the pointed cell, or
+  /// score for a Monument there: the reason behind the number on the cell.
+  final List<RRect> _feeding = [];
+  final Paint _feedingLine = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 2.0
+    ..color = GamePalette.feedingMark;
+
   /// The districts a capture on the pointed cell would cut off from their
   /// heart, each marked.
   final List<RRect> _abandoned = [];
@@ -75,6 +83,7 @@ class PreviewRenderer extends Component {
     _yield?.dispose();
     _yield = null;
     _abandoned.clear();
+    _feeding.clear();
 
     final kind = input.armedKind;
     if (pointed == null || kind == null) return;
@@ -94,15 +103,7 @@ class PreviewRenderer extends Component {
         outcome.takes ? GamePalette.previewText : GamePalette.previewWarn,
       );
       for (final cell in outcome.abandoned) {
-        _abandoned.add(RRect.fromRectAndRadius(
-          Rect.fromLTWH(
-            cell.x * _tileSize + 2,
-            cell.y * _tileSize + 2,
-            _tileSize - 4,
-            _tileSize - 4,
-          ),
-          Radius.circular(_tileSize * 0.22),
-        ));
+        _abandoned.add(_cellRect(cell));
       }
       return;
     }
@@ -116,17 +117,33 @@ class PreviewRenderer extends Component {
       _claimLine.color = colour;
     }
 
+    // The cells beside the pointed one that make it worth what it is: own
+    // plain cells of the right terrain for a gathering district, own plain
+    // cells of any terrain for a Monument. Marked, so a +2 says which two.
     final good = kind.gathers;
-    if (good != null) {
+    if (good != null || kind == CardKind.monument) {
       var count = 0;
       for (final beside in pointed.touching) {
-        if (!state.board.contains(beside)) continue;
-        if (state.board.terrainAt(beside).yields != good) continue;
-        if (state.isPlainTerritoryOf(beside, seat)) count++;
+        if (!state.isPlainTerritoryOf(beside, seat)) continue;
+        if (good != null && state.board.terrainAt(beside).yields != good) {
+          continue;
+        }
+        count++;
+        _feeding.add(_cellRect(beside));
       }
       _yield = _text('+$count', GamePalette.previewText);
     }
   }
+
+  RRect _cellRect(Cell cell) => RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          cell.x * _tileSize + 3,
+          cell.y * _tileSize + 3,
+          _tileSize - 6,
+          _tileSize - 6,
+        ),
+        Radius.circular(_tileSize * 0.2),
+      );
 
   TextPainter _text(String text, Color colour) => TextPainter(
         text: TextSpan(
@@ -164,6 +181,9 @@ class PreviewRenderer extends Component {
           (pointed.y + 0.5) * _tileSize - text.height / 2,
         ),
       );
+    }
+    for (final mark in _feeding) {
+      canvas.drawRRect(mark, _feedingLine);
     }
     for (final mark in _abandoned) {
       canvas.drawRRect(mark, _abandonedLine);
