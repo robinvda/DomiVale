@@ -21,17 +21,19 @@ multiplayer mode can be added later without rewriting the rules.
 
 ## Status
 
-**Early development: the market.** A skirmish of two to four houses is
-played hot-seat on a generated valley: every house claims the land within
-three cells of its heart, a card armed from the hand shows every cell it
-could go to and the land it would claim there, and a tap plays it. The
-market sells a row of five from a shared deck, two a turn, beside the basic
-piles whose price rises with the house's districts, and the bank trades
-three for one. Anything in a turn can be undone until it ends; a handover
-card between turns keeps each hand hidden. The rules live in
+**Early development: the whole rule set, played by hand.** A skirmish of
+two to four houses is played hot-seat on a generated valley: every house
+claims the land within three cells of its heart, a card armed from the hand
+shows every cell it could go to and the land it would claim or take there,
+and a tap plays it. The market sells a row of five from a shared deck, two a
+turn, beside the basic piles whose price rises with the house's districts,
+and the bank trades three for one. Marches and Sieges take cells, raze
+districts and bring whole cities over when a heart falls; a house with no
+heart left is out, and a duel ends there. Anything in a turn can be undone
+until it ends; a handover card between turns keeps each hand hidden. The rules live in
 `packages/domivale_rules`, a pure Dart package with no Flutter in it, and
-replay a match to the same state on the VM and in a browser. War and bots
-are the next phases. See [DESIGN.md](DESIGN.md) §18.
+replay a match to the same state on the VM and in a browser. Bots are the
+next phase. See [DESIGN.md](DESIGN.md) §18.
 
 ## Development setup
 

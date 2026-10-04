@@ -12,8 +12,9 @@ class City {
   /// The city's place in the match's list of cities. Never reused.
   final int id;
 
-  /// The seat of the house that founded it.
-  final int owner;
+  /// The seat of the house that holds it: the founder, until its heart is
+  /// taken.
+  int owner;
 
   /// The cell the city was founded on.
   final Cell heart;
@@ -37,6 +38,11 @@ class City {
   /// state has already checked the cell.
   void placeDistrict(Cell cell, CardKind kind) {
     _districts[cell] = kind;
+  }
+
+  /// Takes a district off the city: razed, or cut off from the heart.
+  void removeDistrict(Cell cell) {
+    _districts.remove(cell);
   }
 
   /// How many districts of [kind] the city has.

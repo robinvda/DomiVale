@@ -328,11 +328,18 @@ void main() {
   });
 
   group('military cards', () {
-    test('have no target in these rules yet', () {
+    test('are offered on cells beside your land, never on your own', () {
       final state = MatchState.start(twoHouses(first: Banner.warlord));
       expect(state.houses[0].hand.last, CardKind.siege);
-      expect(state.offeredCells(CardKind.siege), isEmpty);
-      expect(state.apply(const PlayCard(2, Cell(7, 3))), Refusal.notATarget);
+      final offered = state.offeredCells(CardKind.siege).toSet();
+      expect(offered, isNotEmpty);
+      for (final cell in offered) {
+        expect(state.ownerOf(cell), isNot(0));
+        expect(cell.touching.any((c) => state.ownerOf(c) == 0), isTrue);
+      }
+      expect(state.apply(const PlayCard(2, Cell(3, 4))), Refusal.cellIsYours);
+      expect(state.apply(const PlayCard(2, Cell(12, 12))),
+          Refusal.notTouchingYourLand);
     });
   });
 

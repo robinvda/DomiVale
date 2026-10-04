@@ -36,9 +36,18 @@ class PreviewRenderer extends Component {
     ..style = PaintingStyle.stroke
     ..strokeWidth = 2.0;
 
-  /// What a district on the pointed cell would yield, or null when nothing
-  /// is worth saying.
+  /// What a district on the pointed cell would yield, or for an army what
+  /// it brings against the target's defence; null when nothing is worth
+  /// saying.
   TextPainter? _yield;
+
+  /// The districts a capture on the pointed cell would cut off from their
+  /// heart, each marked.
+  final List<RRect> _abandoned = [];
+  final Paint _abandonedLine = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 2.0
+    ..color = GamePalette.abandonedMark;
 
   /// The ring around the cell the player is reading, or null.
   RRect? _inspected;
@@ -65,6 +74,7 @@ class PreviewRenderer extends Component {
     _claim = null;
     _yield?.dispose();
     _yield = null;
+    _abandoned.clear();
 
     final kind = input.armedKind;
     if (pointed == null || kind == null) return;
@@ -73,6 +83,29 @@ class PreviewRenderer extends Component {
     final state = input.state;
     final seat = state.currentSeat;
     final colour = GamePalette.houses[seat];
+
+    if (kind.isMilitary) {
+      final outcome = state.attackOutcome(kind, pointed);
+      if (outcome == null) return;
+      _yield = _text(
+        outcome.takes
+            ? '${outcome.strength} › ${outcome.defence}'
+            : '${outcome.strength} / ${outcome.defence}',
+        outcome.takes ? GamePalette.previewText : GamePalette.previewWarn,
+      );
+      for (final cell in outcome.abandoned) {
+        _abandoned.add(RRect.fromRectAndRadius(
+          Rect.fromLTWH(
+            cell.x * _tileSize + 2,
+            cell.y * _tileSize + 2,
+            _tileSize - 4,
+            _tileSize - 4,
+          ),
+          Radius.circular(_tileSize * 0.22),
+        ));
+      }
+      return;
+    }
     final claimed = [
       for (final near in pointed.cellsWithinReach(Rules.claimReach))
         if (state.isUnclaimed(near)) (x: near.x, y: near.y, radius: 0),
@@ -91,14 +124,18 @@ class PreviewRenderer extends Component {
         if (state.board.terrainAt(beside).yields != good) continue;
         if (state.isPlainTerritoryOf(beside, seat)) count++;
       }
-      _yield = TextPainter(
+      _yield = _text('+$count', GamePalette.previewText);
+    }
+  }
+
+  TextPainter _text(String text, Color colour) => TextPainter(
         text: TextSpan(
-          text: '+$count',
+          text: text,
           style: TextStyle(
             fontFamily: 'Nunito',
             fontWeight: FontWeight.w800,
-            fontSize: _tileSize * 0.42,
-            color: GamePalette.previewText,
+            fontSize: _tileSize * 0.38,
+            color: colour,
             shadows: const [
               Shadow(color: GamePalette.previewTextShadow, blurRadius: 3),
             ],
@@ -106,8 +143,6 @@ class PreviewRenderer extends Component {
         ),
         textDirection: TextDirection.ltr,
       )..layout();
-    }
-  }
 
   @override
   void render(Canvas canvas) {
@@ -129,6 +164,9 @@ class PreviewRenderer extends Component {
           (pointed.y + 0.5) * _tileSize - text.height / 2,
         ),
       );
+    }
+    for (final mark in _abandoned) {
+      canvas.drawRRect(mark, _abandonedLine);
     }
     final inspected = _inspected;
     if (inspected != null) canvas.drawRRect(inspected, _inspectRing);

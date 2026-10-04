@@ -335,7 +335,14 @@ class _Reading extends StatelessWidget {
     final city = state.cityAt(cell);
     final parts = <String>[board.terrainAt(cell).label];
     if (board.heightAt(cell) > 0) parts.add('height ${board.heightAt(cell)}');
-    if (owner != MatchState.noHouse) parts.add(state.houses[owner].name);
+    if (owner != MatchState.noHouse) {
+      parts.add(state.isFallenLand(cell)
+          ? '${state.houses[owner].name}, fallen'
+          : state.houses[owner].name);
+    }
+    if (owner != state.currentSeat && board.terrainAt(cell).isLand) {
+      parts.add('defence ${state.defenceOf(cell, state.currentSeat)}');
+    }
     if (city != null) {
       final kind = city.districts[cell];
       parts.add(kind == null ? 'heart' : kind.label.toLowerCase());
@@ -445,7 +452,9 @@ class _MatchEnd extends StatelessWidget {
               children: [
                 PaperHeading(
                   title: '${winner.name} rules the valley',
-                  subtitle: 'After ${Rules.rounds} rounds.',
+                  subtitle: state.round > Rules.rounds
+                      ? 'After ${Rules.rounds} rounds.'
+                      : 'The last heart standing, in round ${state.round}.',
                 ),
                 const SizedBox(height: 16),
                 for (final seat in standings)

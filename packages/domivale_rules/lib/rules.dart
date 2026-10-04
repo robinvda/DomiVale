@@ -73,6 +73,27 @@ abstract final class Rules {
   /// One crown per this many cells owned, city cells included.
   static const int cellsPerCrown = 3;
 
+  /// What a target needs to be taken, by what stands on it. Open land is 0.
+  static const int territoryDefence = 1;
+  static const int districtDefence = 3;
+  static const int heartDefence = 5;
+
+  /// Plus one on forest or hills, plus one for a target standing higher
+  /// than every attacking cell that touches it.
+  static const int terrainDefenceBonus = 1;
+  static const int heightDefenceBonus = 1;
+
+  /// Walls add this to the owner's cells within [wallsReach].
+  static const int wallsBonus = 2;
+  static const int wallsReach = 1;
+
+  /// A Barracks adds this to the owner's attacks within [barracksReach].
+  static const int barracksBonus = 1;
+  static const int barracksReach = 3;
+
+  /// Renown for every district razed or heart taken, kept for the match.
+  static const int renownPerCityCell = 1;
+
   /// The board is square and sized to the number of houses, so that every
   /// match has about 250 cells per house.
   static int boardSize(int houses) {

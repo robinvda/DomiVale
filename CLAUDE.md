@@ -11,11 +11,11 @@ and LumaVale's setting, fonts and UI chrome.
 `DESIGN.md` holds the full design document, the starting numbers and the
 phased roadmap. This file holds the engineering rules.
 
-**Status: Phases 0 to 3 done, Phase 4 (war) next.** The rules core and the
-market are written and tested, and a skirmish is played hot-seat on a
-generated board: arm a card, see what it would claim, tap to play, buy from
-the row and the piles, trade, undo, end turn. The readability check on a
-real phone (Phase 2's last item) is still to do.
+**Status: Phases 0 to 4 done, Phase 5 (bots) next.** The rules core, the
+market and war are written and tested, and a skirmish is played hot-seat on
+a generated board: arm a card, see what it would claim or take, tap to play,
+buy from the row and the piles, trade, undo, end turn. The readability check
+on a real phone (Phase 2's last item) is still to do.
 
 ## Engineering philosophy
 
@@ -73,6 +73,23 @@ Rules that follow, each of which costs a bug when missed:
 - **Only market cards pass through the discard pile.** A played basic goes
   nowhere, or the deck's mix would drift toward Farms over a match. The
   banner cards (Monument, Siege) are market kinds and do go to the discard.
+- **An attack is pressure that adds up within a turn.** `_pressure` holds
+  the strength played on each target this turn; a card captures when
+  pressure plus its strength plus the Barracks bonus (once per attack) beats
+  the defence. `_canFinishAttack` offers a target only when the rest of the
+  hand and the plays left could still complete it, which is what keeps "an
+  attack never fails" true. Pressure clears at the end of the turn.
+- **City cells can be attacked only if they touched the attacker's land when
+  the turn began.** `_cityTargetsAtTurnStart` is recorded in `_beginTurn`;
+  territory cells have no such rule, so a March can take a cell and the next
+  March the cell behind it.
+- **A heart capture moves the `City` object.** `City.owner` is mutable for
+  that reason and no other; its id never changes. The land that follows is
+  every plain cell of the victim within reach 3 of that city and of no other
+  city of theirs.
+- **A fallen house stays in the match's data.** Its seat keeps its cells
+  (`isFallenLand`), its hand is emptied, `crownsOf` gives 0, and `_endTurn`
+  skips it. Nothing removes a house from `houses`.
 - **One `Prng` per match, carried across every reshuffle.** `Market.start`
   seeds it from the header; recycling the discard uses the same generator, so
   the order after a reshuffle is as reproducible as the first deal. A header

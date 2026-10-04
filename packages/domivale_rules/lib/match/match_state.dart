@@ -1,5 +1,6 @@
 import '../board/board.dart';
 import '../board/cell.dart';
+import '../board/terrain_kind.dart';
 import '../cards/card_kind.dart';
 import '../cards/market.dart';
 import '../cards/prng.dart';
@@ -11,6 +12,7 @@ import 'house.dart';
 import 'match.dart';
 
 part 'apply.dart';
+part '../war/defence.dart';
 
 /// The whole state of a match at one moment: who owns which cell, the
 /// cities, the houses' goods and hands, and whose turn it is.
@@ -111,10 +113,18 @@ class MatchState {
   /// The shared row, deck and discard pile.
   final Market market;
 
+  /// Strength the current house has played on each target this turn that
+  /// has not yet taken it. Cleared when the turn ends.
+  final Map<Cell, int> _pressure = {};
+
+  /// The rival city cells that touched the current house's land when its
+  /// turn began. Only these can be attacked this turn.
+  Set<Cell> _cityTargetsAtTurnStart = const {};
+
   // ── Turn order ─────────────────────────────────────────────────────────
 
-  /// Every house has played its last turn.
-  bool get isOver => round > Rules.rounds;
+  /// Every house has played its last turn, or only one still has a heart.
+  bool get isOver => round > Rules.rounds || aliveCount <= 1;
 
   /// The seat round [round] starts with: one later every round, wrapping.
   int get firstSeat => (round - 1) % houses.length;
@@ -241,10 +251,15 @@ class MatchState {
   // ── Offered cells ──────────────────────────────────────────────────────
 
   /// Every cell the current house could play [kind] on. What the game
-  /// highlights when a card is armed.
-  Iterable<Cell> offeredCells(CardKind kind) sync* {
+  /// highlights when a card is armed. For a military card, [handIndex] says
+  /// which card, since the rest of the hand decides what can be finished.
+  Iterable<Cell> offeredCells(CardKind kind, {int? handIndex}) sync* {
+    final index = handIndex ?? currentHouse.hand.indexOf(kind);
     for (final cell in board.cells) {
-      if (_placementRefusal(kind, cell) == null) yield cell;
+      final refusal = kind.isMilitary
+          ? _attackRefusal(kind, cell, index)
+          : _placementRefusal(kind, cell);
+      if (refusal == null) yield cell;
     }
   }
 
@@ -280,6 +295,8 @@ class MatchState {
   void _beginTurn() {
     playsLeft = Rules.playsPerTurn;
     rowBuysLeft = Rules.rowBuysPerTurn;
+    _pressure.clear();
+    _cityTargetsAtTurnStart = _reachableCityCells();
     currentHouse.goods += yieldOf(currentSeat);
   }
 
@@ -302,6 +319,12 @@ class MatchState {
     fold(playsLeft);
     fold(rowBuysLeft);
     market.fingerprint(fold);
+    final pressed = _pressure.keys.toList()
+      ..sort((a, b) => board.indexOf(a).compareTo(board.indexOf(b)));
+    for (final cell in pressed) {
+      fold(board.indexOf(cell));
+      fold(_pressure[cell]!);
+    }
     _owner.forEach(fold);
     _cityOf.forEach(fold);
     for (final house in houses) {

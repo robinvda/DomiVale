@@ -48,9 +48,18 @@ abstract final class GamePalette {
   /// The yield glyph on a plain cell, faint enough to read as texture.
   static const yieldIcon = Color(0x66FFFFFF);
 
-  /// The number on a previewed cell: what a district there would yield.
+  /// The number on a previewed cell: what a district there would yield, or
+  /// what an army brings against the target.
   static const previewText = Color(0xFFFAF8F3);
   static const previewTextShadow = Color(0xCC1A1A1E);
+
+  /// The same figure when the attack would not yet take the cell: strength
+  /// still to come.
+  static const previewWarn = Color(0xFFE8A33D);
+
+  /// The ring on a district an attack would cut off from its heart. Loss,
+  /// in a colour nothing else on the board wears.
+  static const abandonedMark = Color(0xFFC0563F);
 
   /// The ring around a cell the player is reading.
   static const inspectRing = Color(0xFFFFD166);

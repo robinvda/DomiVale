@@ -47,7 +47,8 @@ class InputController {
   List<Cell> get offeredCells {
     final kind = armedKind;
     if (kind == null) return const [];
-    return _offered ??= state.offeredCells(kind).toList();
+    return _offered ??=
+        state.offeredCells(kind, handIndex: _armedIndex).toList();
   }
 
   List<Cell>? _offered;

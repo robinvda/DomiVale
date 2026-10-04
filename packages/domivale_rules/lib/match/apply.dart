@@ -65,7 +65,9 @@ extension MatchStateActions on MatchState {
     }
     if (playsLeft == 0) return Refusal.noPlaysLeft;
     final kind = house.hand[handIndex];
-    final refusal = _placementRefusal(kind, cell);
+    final refusal = kind.isMilitary
+        ? _attackRefusal(kind, cell, handIndex)
+        : _placementRefusal(kind, cell);
     if (refusal != null) return refusal;
 
     house.hand.removeAt(handIndex);
@@ -77,6 +79,19 @@ extension MatchStateActions on MatchState {
       _placeDistrict(_cityToGrow(house.seat, cell)!, cell, kind);
     } else if (kind == CardKind.settle) {
       _foundCity(house.seat, cell);
+    } else {
+      _attack(kind, cell);
+    }
+    return null;
+  }
+
+  /// Why the current house could not play military [kind] on [cell], or
+  /// null if it could: a legal target that the hand can finish this turn.
+  Refusal? _attackRefusal(CardKind kind, Cell cell, int handIndex) {
+    final refusal = _targetRefusal(kind, cell);
+    if (refusal != null) return refusal;
+    if (!_canFinishAttack(kind, cell, handIndex)) {
+      return Refusal.notEnoughStrength;
     }
     return null;
   }
@@ -104,9 +119,8 @@ extension MatchStateActions on MatchState {
       }
       return null;
     }
-    // Military cards have no targets in these rules yet: war is Phase 4 of
-    // the roadmap in DESIGN.md.
-    return Refusal.notATarget;
+    // Military cards go through _attackRefusal.
+    return Refusal.cellIsYours;
   }
 
   /// The city of [seat] a district on [cell] would join: the one with the
@@ -121,17 +135,21 @@ extension MatchStateActions on MatchState {
     return found;
   }
 
-  /// Passes the turn to the next house. The row refills first, so nothing
-  /// new is revealed until the turn is committed. When every house has
-  /// played, the round ends and the next one starts one seat later; after
-  /// the last round the match is over and nothing more is collected.
+  /// Passes the turn to the next house still in the match. The row refills
+  /// first, so nothing new is revealed until the turn is committed. When
+  /// every house has played, the round ends and the next one starts one seat
+  /// later; after the last round the match is over and nothing more is
+  /// collected.
   void _endTurn() {
     market.refill();
-    turnInRound++;
-    if (turnInRound == houses.length) {
-      turnInRound = 0;
-      round++;
-    }
+    _pressure.clear();
+    do {
+      turnInRound++;
+      if (turnInRound == houses.length) {
+        turnInRound = 0;
+        round++;
+      }
+    } while (!isOver && !isAlive(currentSeat));
     if (!isOver) _beginTurn();
   }
 }

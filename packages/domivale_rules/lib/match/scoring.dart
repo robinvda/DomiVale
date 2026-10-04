@@ -22,7 +22,9 @@ extension Scoring on MatchState {
 
   /// [seat]'s crowns right now: 1 per [Rules.cellsPerCrown] cells owned, 1
   /// per heart, 1 per Market, a Monument's touching plain cells, and renown.
+  /// A house that is out of the match scores nothing.
   int crownsOf(int seat) {
+    if (!isAlive(seat)) return 0;
     var crowns = cellsOwnedBy(seat) ~/ Rules.cellsPerCrown;
     for (final city in citiesOf(seat)) {
       crowns += 1;

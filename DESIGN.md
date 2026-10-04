@@ -182,7 +182,7 @@ packages/domivale_rules/
 │   │   ├── prng.dart             # the deterministic shuffle   ✓
 │   │   └── market.dart           # the row, the deck, the discard and its refill   ✓
 │   ├── war/
-│   │   └── defence.dart          # what a cell needs to be taken (§5)
+│   │   └── defence.dart          # defence, strength, pressure, captures (§5; a part of match_state)   ✓
 │   └── bots/
 │       ├── bot.dart              # chooses a turn's actions
 │       └── temperament.dart      # builder, expander, warlord weights
@@ -1098,7 +1098,7 @@ the row buys left show on the button. The hand is still a plain row of
 cards rather than LumaVale's fan; a player's choice of opening basic is
 still made from the land, not asked.
 
-### Phase 4 — War
+### Phase 4 — War ✓
 - March and Siege, defence, Walls and Barracks, captures, start-of-turn
   reachability for city cells, renown, abandonment of cut-off districts, heart
   capture, elimination and fallen land.
@@ -1107,6 +1107,19 @@ still made from the land, not asked.
   cell is lost again; razing the base of a thin arm abandons the arm and
   leaves the land with its owner; a razed district in a compact city abandons
   nothing.
+
+**Done.** Military cards played on one target in one turn add up as
+*pressure*: the first Siege on a heart presses it, the second takes it. A
+target is offered only when the cards in hand could still finish the attack
+this turn, so an attack that is started can always be completed or undone,
+and unfinished pressure is dropped when the turn ends. The Barracks bonus
+counts once per attack. Defence follows §5.1 with height included; a fallen
+house has no Walls. A heart capture moves the city object to the attacker
+with the land around it; a house with no hearts is skipped in the turn
+order, its hand is emptied, and its land stays as fallen land. A match ends
+early when one house has a heart left. The board preview shows strength
+against defence on the pointed cell and rings the districts a capture would
+cut off; holding a cell shows its defence.
 
 ### Phase 5 — Bots
 - Turn search and the three temperaments; bot turns off the UI thread if

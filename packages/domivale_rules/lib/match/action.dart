@@ -112,7 +112,13 @@ enum Refusal {
   cellIsCity('A city already stands there.'),
   notTouchingYourCity('A district has to touch one of your cities.'),
   tooCloseToACity('A new city needs open land, away from every city.'),
-  notATarget('That is not a cell this card can take.');
+  cellIsYours('That land is already yours.'),
+  notTouchingYourLand('An army can only march into a cell beside your land.'),
+  marchOnCity('A March cannot take a city cell; that needs a Siege.'),
+  cityNotReachableAtTurnStart(
+      'A city cell has to have touched your land when the turn began.'),
+  notEnoughStrength(
+      'That cell needs more strength than you can bring this turn.');
 
   const Refusal(this.message);
 
