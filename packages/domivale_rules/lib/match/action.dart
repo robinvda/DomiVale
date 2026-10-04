@@ -1,5 +1,6 @@
 import '../board/cell.dart';
 import '../cards/card_kind.dart';
+import 'goods.dart';
 
 /// One thing the house whose turn it is asks the rules to do.
 ///
@@ -24,6 +25,41 @@ class BuyBasic extends Action {
 
   @override
   String toString() => 'BuyBasic(${kind.label})';
+}
+
+/// Buy the card in [slot] of the market row into the hand.
+class BuyFromRow extends Action {
+  const BuyFromRow(this.slot);
+
+  final int slot;
+
+  @override
+  bool operator ==(Object other) => other is BuyFromRow && slot == other.slot;
+
+  @override
+  int get hashCode => Object.hash(BuyFromRow, slot);
+
+  @override
+  String toString() => 'BuyFromRow($slot)';
+}
+
+/// Trade some of [give] for one [take]: three for one at the bank, two for
+/// one with a Market.
+class Trade extends Action {
+  const Trade({required this.give, required this.take});
+
+  final Good give;
+  final Good take;
+
+  @override
+  bool operator ==(Object other) =>
+      other is Trade && give == other.give && take == other.take;
+
+  @override
+  int get hashCode => Object.hash(Trade, give, take);
+
+  @override
+  String toString() => 'Trade(${give.label} for ${take.label})';
 }
 
 /// Play the card at [handIndex] on [cell].
@@ -63,6 +99,9 @@ class EndTurn extends Action {
 enum Refusal {
   matchOver('The match is over.'),
   notABasicCard('Only Farms, Lumber camps and Quarries come from the piles.'),
+  rowSlotEmpty('That card has already been taken this turn.'),
+  noRowBuysLeft('Two cards from the row is all one turn can buy.'),
+  sameGood('Trading a good for itself changes nothing.'),
   handFull('Your hand is full.'),
   cannotAfford('You cannot pay for that yet.'),
   noSuchCard('That card is not in your hand.'),

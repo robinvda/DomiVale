@@ -180,7 +180,7 @@ packages/domivale_rules/
 │   ├── cards/
 │   │   ├── card_kind.dart        # the table in §6   ✓
 │   │   ├── prng.dart             # the deterministic shuffle   ✓
-│   │   └── market.dart           # the row, the basic piles, the deck and its refill
+│   │   └── market.dart           # the row, the deck, the discard and its refill   ✓
 │   ├── war/
 │   │   └── defence.dart          # what a cell needs to be taken (§5)
 │   └── bots/
@@ -211,7 +211,7 @@ lib/
 │   ├── game_screen.dart          # the board, the HUD, the handover between turns   ✓
 │   ├── hud.dart                  # goods, crowns, round
 │   ├── hand_bar.dart             # the hand along the foot   ✓
-│   ├── market_panel.dart         # the row and the basic piles
+│   ├── market_panel.dart         # the row, the basic piles and the trades   ✓
 │   └── match_end_panel.dart
 ├── persistence/
 └── theme/
@@ -1078,13 +1078,25 @@ its land (whichever of wood and stone there is more of), since the market
 panel that lets the player choose is Phase 3. The readability check at 12 px
 on a real phone has not been done and is the gate before Phase 3.
 
-### Phase 3 — Market and cards
+### Phase 3 — Market and cards ✓
 - The row, the deck, the discard pile, the PRNG, refill at end of turn,
   trading, the hand cap, the two-buy cap, the rising basic and Settle prices,
   banner cards and the chosen opening basic.
 - The hand bar and the market panel; arming, offered cells and previews.
 - Tests: a third row buy in a turn is refused; a Settle's price follows the
   cities held; the deck recycles the discard pile in seed order.
+
+**Done.** The market lives in the rules package: a row of five dealt from
+the forty-card deck shuffled by the match seed, gaps left until the turn
+ends, the discard pile shuffled into a new deck with the same generator when
+the deck runs out, two row buys a turn, trading at 3 for 1 or 2 for 1 with a
+Market. Played market cards go to the discard; basics come from piles
+without limit and go nowhere. A header may carry a deck in a fixed order,
+for tests and hand-made boards. In the game a Market button beside the hand
+opens a panel over the board with the row, the piles and the six trades, and
+the row buys left show on the button. The hand is still a plain row of
+cards rather than LumaVale's fan; a player's choice of opening basic is
+still made from the land, not asked.
 
 ### Phase 4 — War
 - March and Siege, defence, Walls and Barracks, captures, start-of-turn

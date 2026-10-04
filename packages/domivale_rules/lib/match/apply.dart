@@ -12,6 +12,10 @@ extension MatchStateActions on MatchState {
     switch (action) {
       case BuyBasic(:final kind):
         return _buyBasic(kind);
+      case BuyFromRow(:final slot):
+        return _buyFromRow(slot);
+      case Trade(:final give, :final take):
+        return _trade(give, take);
       case PlayCard(:final handIndex, :final cell):
         return _playCard(handIndex, cell);
       case EndTurn():
@@ -31,6 +35,29 @@ extension MatchStateActions on MatchState {
     return null;
   }
 
+  Refusal? _buyFromRow(int slot) {
+    final house = currentHouse;
+    final kind = market.at(slot);
+    if (kind == null) return Refusal.rowSlotEmpty;
+    if (rowBuysLeft == 0) return Refusal.noRowBuysLeft;
+    if (house.hand.length >= Rules.handCap) return Refusal.handFull;
+    final price = priceOf(kind, house.seat);
+    if (!house.goods.covers(price)) return Refusal.cannotAfford;
+    house.goods -= price;
+    house.hand.add(market.take(slot));
+    rowBuysLeft--;
+    return null;
+  }
+
+  Refusal? _trade(Good give, Good take) {
+    final house = currentHouse;
+    if (give == take) return Refusal.sameGood;
+    final rate = tradeRateFor(house.seat);
+    if (house.goods.of(give) < rate) return Refusal.cannotAfford;
+    house.goods = house.goods - Goods.only(give, rate) + Goods.only(take, 1);
+    return null;
+  }
+
   Refusal? _playCard(int handIndex, Cell cell) {
     final house = currentHouse;
     if (handIndex < 0 || handIndex >= house.hand.length) {
@@ -43,6 +70,9 @@ extension MatchStateActions on MatchState {
 
     house.hand.removeAt(handIndex);
     playsLeft--;
+    // Market cards come back round through the discard pile; a basic card
+    // came from a pile without limit and goes nowhere.
+    if (!kind.isBasic) market.discard(kind);
     if (kind.isDistrict) {
       _placeDistrict(_cityToGrow(house.seat, cell)!, cell, kind);
     } else if (kind == CardKind.settle) {
@@ -91,10 +121,12 @@ extension MatchStateActions on MatchState {
     return found;
   }
 
-  /// Passes the turn to the next house. When every house has played, the
-  /// round ends and the next one starts one seat later; after the last round
-  /// the match is over and nothing more is collected.
+  /// Passes the turn to the next house. The row refills first, so nothing
+  /// new is revealed until the turn is committed. When every house has
+  /// played, the round ends and the next one starts one seat later; after
+  /// the last round the match is over and nothing more is collected.
   void _endTurn() {
+    market.refill();
     turnInRound++;
     if (turnInRound == houses.length) {
       turnInRound = 0;

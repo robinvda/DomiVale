@@ -2,6 +2,7 @@ import 'package:domivale/game/match_setup.dart';
 import 'package:domivale/ui/game_screen.dart';
 import 'package:domivale/ui/hand_bar.dart';
 import 'package:domivale/ui/hud/status_panel.dart';
+import 'package:domivale/ui/market_panel.dart';
 import 'package:domivale_rules/domivale_rules.dart';
 import 'package:flutter/material.dart' hide Banner;
 import 'package:flutter_test/flutter_test.dart';
@@ -47,10 +48,18 @@ void main() {
     await tester.pump();
     expect(tester.takeException(), isNull);
 
-    // Buying from a pile puts a card in the hand.
+    // The market opens over the board with the row of five and the piles;
+    // buying from a pile puts a card in the hand.
+    await tester.tap(find.text('Market'));
+    await tester.pump();
+    expect(find.byType(MarketPanel), findsOneWidget);
+    expect(find.byType(RowSlot), findsNWidgets(5));
     await tester.tap(find.byType(PileChip).first);
     await tester.pump();
     expect(find.byType(HandCardView), findsNWidgets(4));
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pump();
+    expect(find.byType(MarketPanel), findsNothing);
 
     // Ending the turn hands over to the next house.
     await tester.tap(find.text('End turn'));

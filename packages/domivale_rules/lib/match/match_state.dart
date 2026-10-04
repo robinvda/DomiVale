@@ -1,6 +1,8 @@
 import '../board/board.dart';
 import '../board/cell.dart';
 import '../cards/card_kind.dart';
+import '../cards/market.dart';
+import '../cards/prng.dart';
 import '../rules.dart';
 import 'action.dart';
 import 'city.dart';
@@ -27,9 +29,13 @@ class MatchState {
         ],
         _owner = List.filled(header.board.cellCount, noHouse),
         _cityOf = List.filled(header.board.cellCount, noCity),
+        market = header.deck == null
+            ? Market.start(header.seed)
+            : Market.deal(header.deck!, Prng(header.seed)),
         round = 1,
         turnInRound = 0,
-        playsLeft = Rules.playsPerTurn {
+        playsLeft = Rules.playsPerTurn,
+        rowBuysLeft = Rules.rowBuysPerTurn {
     for (final house in houses) {
       final heart = house.setup.heart;
       if (!board.isLand(heart)) {
@@ -98,6 +104,12 @@ class MatchState {
 
   /// Cards the current house may still play this turn.
   int playsLeft;
+
+  /// Cards the current house may still buy from the row this turn.
+  int rowBuysLeft;
+
+  /// The shared row, deck and discard pile.
+  final Market market;
 
   // ── Turn order ─────────────────────────────────────────────────────────
 
@@ -187,6 +199,12 @@ class MatchState {
     return kind.price;
   }
 
+  /// How many of one good [seat] gives for one of another: fewer with a
+  /// Market.
+  int tradeRateFor(int seat) => districtsOfKind(seat, CardKind.market) > 0
+      ? Rules.marketTrade
+      : Rules.bankTrade;
+
   // ── Yields ─────────────────────────────────────────────────────────────
 
   /// What the gathering district on [cell] produces: 1 of its good for each
@@ -261,6 +279,7 @@ class MatchState {
   /// plays again.
   void _beginTurn() {
     playsLeft = Rules.playsPerTurn;
+    rowBuysLeft = Rules.rowBuysPerTurn;
     currentHouse.goods += yieldOf(currentSeat);
   }
 
@@ -281,6 +300,8 @@ class MatchState {
     fold(round);
     fold(turnInRound);
     fold(playsLeft);
+    fold(rowBuysLeft);
+    market.fingerprint(fold);
     _owner.forEach(fold);
     _cityOf.forEach(fold);
     for (final house in houses) {

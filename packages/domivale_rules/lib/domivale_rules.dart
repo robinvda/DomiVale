@@ -9,6 +9,7 @@ export 'board/board.dart';
 export 'board/cell.dart';
 export 'board/terrain_kind.dart';
 export 'cards/card_kind.dart';
+export 'cards/market.dart';
 export 'cards/prng.dart';
 export 'match/action.dart';
 export 'match/banner.dart';

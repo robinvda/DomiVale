@@ -6,78 +6,121 @@ import '../theme/district_look.dart';
 import '../theme/game_palette.dart';
 import 'hud/status_panel.dart';
 
-/// The hand along the foot of the screen, and the three basic piles beside
-/// it.
+/// The hand along the foot of the screen, with the button that opens the
+/// market beside it.
 ///
-/// Tapping a card arms it; the armed card is lifted and ringed. A pile shows
-/// what a basic card costs this house right now, and buying one puts it in
-/// the hand.
+/// Tapping a card arms it; the armed card is lifted and ringed.
 class HandBar extends StatelessWidget {
   const HandBar({
     super.key,
     required this.state,
     required this.armedIndex,
     required this.onArm,
-    required this.onBuy,
+    required this.onOpenMarket,
   });
 
   final MatchState state;
   final int? armedIndex;
   final void Function(int index) onArm;
-  final void Function(CardKind kind) onBuy;
+  final VoidCallback onOpenMarket;
 
   @override
   Widget build(BuildContext context) {
     final house = state.currentHouse;
-    final price = state.basicPriceFor(house.seat);
-    final full = house.hand.length >= Rules.handCap;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
+    return SizedBox(
+      height: HandCardView.height + HandCardView.lift,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (var index = 0; index < house.hand.length; index++)
+                    Padding(
+                      padding: EdgeInsets.only(
+                        right: 8,
+                        bottom: index == armedIndex ? HandCardView.lift : 0,
+                      ),
+                      child: HandCardView(
+                        kind: house.hand[index],
+                        armed: index == armedIndex,
+                        faded: state.playsLeft == 0,
+                        onTap: () => onArm(index),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          MarketButton(state: state, onTap: onOpenMarket),
+        ],
+      ),
+    );
+  }
+}
+
+/// Opens the market. Shows the row buys left, so a glance says whether the
+/// row still has anything to give this turn.
+class MarketButton extends StatelessWidget {
+  const MarketButton({super.key, required this.state, required this.onTap});
+
+  final MatchState state;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Brand.ink,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: 64,
+          height: HandCardView.height,
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              for (final kind in CardKind.basics)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: PileChip(
-                    kind: kind,
-                    price: price,
-                    faded: full || !house.goods.covers(price),
-                    onTap: () => onBuy(kind),
-                  ),
+              const Icon(Icons.storefront, color: Brand.paper, size: 26),
+              const SizedBox(height: 6),
+              const Text(
+                'Market',
+                style: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 11,
+                  color: Brand.paper,
                 ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (var slot = 0; slot < Rules.rowBuysPerTurn; slot++)
+                    Padding(
+                      padding: EdgeInsets.only(left: slot == 0 ? 0 : 4),
+                      child: Container(
+                        width: 9,
+                        height: 9,
+                        decoration: BoxDecoration(
+                          color: slot < state.rowBuysLeft
+                              ? GamePalette.crown
+                              : const Color(0xFF3D4F3F),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
         ),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: HandCardView.height + HandCardView.lift,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                for (var index = 0; index < house.hand.length; index++)
-                  Padding(
-                    padding: EdgeInsets.only(
-                      right: 8,
-                      bottom: index == armedIndex ? HandCardView.lift : 0,
-                    ),
-                    child: HandCardView(
-                      kind: house.hand[index],
-                      armed: index == armedIndex,
-                      faded: state.playsLeft == 0,
-                      onTap: () => onArm(index),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

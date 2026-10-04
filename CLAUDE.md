@@ -11,10 +11,11 @@ and LumaVale's setting, fonts and UI chrome.
 `DESIGN.md` holds the full design document, the starting numbers and the
 phased roadmap. This file holds the engineering rules.
 
-**Status: Phases 0 to 2 done, Phase 3 next.** The rules core is written and
-tested, and a skirmish is played hot-seat on a generated board: arm a card,
-see what it would claim, tap to play, buy from the piles, undo, end turn.
-The readability check on a real phone (Phase 2's last item) is still to do.
+**Status: Phases 0 to 3 done, Phase 4 (war) next.** The rules core and the
+market are written and tested, and a skirmish is played hot-seat on a
+generated board: arm a card, see what it would claim, tap to play, buy from
+the row and the piles, trade, undo, end turn. The readability check on a
+real phone (Phase 2's last item) is still to do.
 
 ## Engineering philosophy
 
@@ -66,6 +67,16 @@ Rules that follow, each of which costs a bug when missed:
   table in `DESIGN.md` §13.
 - **Undo is forgetting the end of the log.** `Match.truncate` and a replay. No
   state is unwound by hand.
+- **The row refills at the end of a turn, never when a card is bought.**
+  That is what keeps undo free: nothing new is revealed until the turn is
+  committed. A bought slot is a gap (`null`) until then.
+- **Only market cards pass through the discard pile.** A played basic goes
+  nowhere, or the deck's mix would drift toward Farms over a match. The
+  banner cards (Monument, Siege) are market kinds and do go to the discard.
+- **One `Prng` per match, carried across every reshuffle.** `Market.start`
+  seeds it from the header; recycling the discard uses the same generator, so
+  the order after a reshuffle is as reproducible as the first deal. A header
+  may carry `deck` in a fixed order instead, dealt from the end.
 
 `apply.dart` is a `part` of `match_state.dart` so it can reach the state's
 private fields while staying its own file; `scoring.dart` is an extension on

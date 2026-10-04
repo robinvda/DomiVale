@@ -12,6 +12,7 @@ import '../theme/game_palette.dart';
 import 'hand_bar.dart';
 import 'hud/hud_widgets.dart';
 import 'hud/status_panel.dart';
+import 'market_panel.dart';
 
 /// The screen a match is played on.
 ///
@@ -48,6 +49,9 @@ class _GameScreenState extends State<GameScreen> {
   /// Whether the handover card is up: the next house has not yet taken the
   /// turn. Up from the first frame, so the first house takes its turn too.
   bool _handingOver = true;
+
+  /// Whether the market is open over the board.
+  bool _marketOpen = false;
 
   @override
   void initState() {
@@ -87,14 +91,29 @@ class _GameScreenState extends State<GameScreen> {
     setState(() {});
   }
 
-  void _buy(CardKind kind) {
+  void _buyBasic(CardKind kind) {
     final refusal = _game.buyBasic(kind);
     if (refusal != null) _say(refusal);
     setState(() {});
   }
 
+  void _buyRow(int slot) {
+    final refusal = _game.buyFromRow(slot);
+    if (refusal != null) _say(refusal);
+    setState(() {});
+  }
+
+  void _trade(Good give, Good take) {
+    final refusal = _game.trade(give, take);
+    if (refusal != null) _say(refusal);
+    setState(() {});
+  }
+
   void _endTurn() {
-    if (_game.endTurn()) _handingOver = true;
+    if (_game.endTurn()) {
+      _handingOver = true;
+      _marketOpen = false;
+    }
     setState(() {});
   }
 
@@ -118,7 +137,7 @@ class _GameScreenState extends State<GameScreen> {
               valueListenable: _game.boardReady,
               builder: (context, ready, child) => WorldGestures(
                 camera: ready ? _game.cameraController : null,
-                enabled: !_handingOver,
+                enabled: !_handingOver && !_marketOpen,
                 onTap: _onTap,
                 onHold: _onHold,
                 onHover: (position) => _game.pointAtScreen(position),
@@ -134,13 +153,50 @@ class _GameScreenState extends State<GameScreen> {
                 builder: (context, _, __) => _Hud(
                   game: _game,
                   onArm: (index) => setState(() => _game.arm(index)),
-                  onBuy: _buy,
+                  onOpenMarket: () => setState(() => _marketOpen = true),
                   onEndTurn: _endTurn,
                   onUndo: () => setState(_game.undo),
                   onWholeBoard: () => setState(_game.showWholeBoard),
                   onLeave: () => Navigator.of(context).pop(),
                 ),
               ),
+            ),
+          ),
+          // The market, over the board, while it is open.
+          Positioned.fill(
+            child: ValueListenableBuilder<int>(
+              valueListenable: _game.hudVersion,
+              builder: (context, _, __) {
+                if (!_marketOpen) return const SizedBox.shrink();
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => setState(() => _marketOpen = false),
+                  child: ColoredBox(
+                    color: const Color(0x66141E16),
+                    child: SafeArea(
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: GestureDetector(
+                            onTap: () {},
+                            child: SingleChildScrollView(
+                              child: MarketPanel(
+                                state: _matches.state,
+                                onBuyRow: _buyRow,
+                                onBuyBasic: _buyBasic,
+                                onTrade: _trade,
+                                onClose: () =>
+                                    setState(() => _marketOpen = false),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           // The handover between turns, over the board the next house is
@@ -172,14 +228,14 @@ class _GameScreenState extends State<GameScreen> {
   /// What the panel at the top and the hand at the foot take of the
   /// viewport. Constants because the layout below is what sets them.
   static const double _panelHeight = 110;
-  static const double _footHeight = 210;
+  static const double _footHeight = 190;
 }
 
 class _Hud extends StatelessWidget {
   const _Hud({
     required this.game,
     required this.onArm,
-    required this.onBuy,
+    required this.onOpenMarket,
     required this.onEndTurn,
     required this.onUndo,
     required this.onWholeBoard,
@@ -188,7 +244,7 @@ class _Hud extends StatelessWidget {
 
   final DomiValeGame game;
   final void Function(int index) onArm;
-  final void Function(CardKind kind) onBuy;
+  final VoidCallback onOpenMarket;
   final VoidCallback onEndTurn;
   final VoidCallback onUndo;
   final VoidCallback onWholeBoard;
@@ -254,7 +310,7 @@ class _Hud extends StatelessWidget {
             state: state,
             armedIndex: game.input.armedIndex,
             onArm: onArm,
-            onBuy: onBuy,
+            onOpenMarket: onOpenMarket,
           ),
         ],
       ),

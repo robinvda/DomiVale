@@ -1,3 +1,4 @@
+import 'cards/card_kind.dart';
 import 'match/goods.dart';
 
 /// The numbers the rules are tuned by, in one place.
@@ -22,6 +23,28 @@ abstract final class Rules {
 
   /// How many cards a hand holds at most.
   static const int handCap = 5;
+
+  /// How many face-up cards the market row holds.
+  static const int rowSize = 5;
+
+  /// How many cards may be bought from the row in one turn. The basic piles
+  /// are not limited.
+  static const int rowBuysPerTurn = 2;
+
+  /// How many of each market card the deck holds: forty cards in all.
+  static const Map<CardKind, int> deckMix = {
+    CardKind.settle: 6,
+    CardKind.march: 10,
+    CardKind.siege: 6,
+    CardKind.market: 5,
+    CardKind.walls: 5,
+    CardKind.barracks: 4,
+    CardKind.monument: 4,
+  };
+
+  /// How many of one good buy one of another at the bank, and with a Market.
+  static const int bankTrade = 3;
+  static const int marketTrade = 2;
 
   /// A heart or district claims every unclaimed land cell within this reach.
   static const int claimReach = 3;

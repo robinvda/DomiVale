@@ -1,4 +1,5 @@
 import '../board/board.dart';
+import '../cards/card_kind.dart';
 import '../rules.dart';
 import 'action.dart';
 import 'house_setup.dart';
@@ -12,6 +13,7 @@ class MatchHeader {
     required this.board,
     required this.houses,
     required this.seed,
+    this.deck,
   }) {
     if (houses.length < Rules.minHouses || houses.length > Rules.maxHouses) {
       throw ArgumentError.value(houses.length, 'houses',
@@ -28,8 +30,13 @@ class MatchHeader {
   /// starts with the first and every round after it one seat later.
   final List<HouseSetup> houses;
 
-  /// Seeds the market shuffle.
+  /// Seeds the market shuffle, and every reshuffle of the discard pile.
   final int seed;
+
+  /// A deck in a given order, dealt from the end, instead of the base deck
+  /// shuffled from [seed]. For hand-made boards and tests; null for a
+  /// skirmish.
+  final List<CardKind>? deck;
 }
 
 /// A match is data plus a log: its header and the actions taken so far. The

@@ -33,7 +33,7 @@ const List<Action> script = [
 
 /// What the script leads to. The same value must come out on the VM and in
 /// a browser: this file runs under both.
-const int scriptFingerprint = 526030203;
+const int scriptFingerprint = 839305402;
 
 void main() {
   test('a match is its header plus its log', () {

@@ -249,6 +249,13 @@ class DomiValeGame extends ValeGame {
   /// Buys a basic card into the hand.
   Refusal? buyBasic(CardKind kind) => matches.apply(BuyBasic(kind));
 
+  /// Buys the card in [slot] of the row into the hand.
+  Refusal? buyFromRow(int slot) => matches.apply(BuyFromRow(slot));
+
+  /// Trades some of [give] for one [take], at the house's rate.
+  Refusal? trade(Good give, Good take) =>
+      matches.apply(Trade(give: give, take: take));
+
   bool get canUndo => matches.canUndo;
 
   bool undo() => matches.undo();

@@ -7,9 +7,11 @@ MatchHeader twoHouses({
   Board? board,
   Banner first = Banner.builder,
   Banner second = Banner.warlord,
+  List<CardKind>? deck,
 }) {
   return MatchHeader(
     board: board ?? Board.filled(size: 16),
+    deck: deck,
     houses: [
       HouseSetup(
         name: 'Hill House',
