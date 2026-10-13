@@ -1,10 +1,10 @@
 import 'package:domivale_rules/domivale_rules.dart';
 import 'package:flame/game.dart' show GameWidget;
 import 'package:flutter/material.dart';
-import 'package:vale_engine/game/debug_controller.dart';
+import 'package:domivale/core/game/debug_controller.dart';
 import 'package:vale_engine/theme/brand_theme.dart';
 import 'package:vale_engine/theme/engine_palette.dart';
-import 'package:vale_engine/ui/world_gestures.dart';
+import 'package:domivale/core/ui/world_gestures.dart';
 
 import '../game/domivale_game.dart';
 import '../game/match_controller.dart';

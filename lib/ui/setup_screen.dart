@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:domivale_rules/domivale_rules.dart';
 import 'package:flutter/material.dart' hide Banner;
 import 'package:vale_engine/theme/brand_theme.dart';
-import 'package:vale_engine/ui/fade_page_route.dart';
+import 'package:domivale/core/ui/fade_page_route.dart';
 
 import '../game/match_setup.dart';
 import '../theme/game_palette.dart';

@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:vale_engine/game/error_log.dart';
+import 'package:domivale/core/game/error_log.dart';
 import 'package:vale_engine/theme/engine_palette.dart';
 
 import 'ui/main_menu_screen.dart';

@@ -4,9 +4,9 @@
 
 DomiVale is a small, turn-based kingdom game in Flutter/Flame: every district
 you add to a city claims the land around it, so growing a city is drawing a
-border, and the land you hold at the end is the score. It is built on
-`vale_engine`, the shared engine behind the Vale games, and shares LogiVale's
-and LumaVale's setting, fonts and UI chrome.
+border, and the land you hold at the end is the score. Its terrain, theme and
+palette come from `vale_engine`, the small library the Vale games share, and
+it shares LogiVale's and LumaVale's setting, fonts and UI chrome.
 
 `DESIGN.md` holds the full design document, the starting numbers and the
 phased roadmap. This file holds the engineering rules.
@@ -108,11 +108,22 @@ Rules that follow, each of which costs a bug when missed:
 private fields while staying its own file; `scoring.dart` is an extension on
 the public queries.
 
-## The engine boundary
+## What comes from `vale_engine`, and what is DomiVale's own
 
-`vale_engine` is a private package consumed by git URL and pinned through
-`pubspec.lock`. Breaking its public API breaks LogiVale and LumaVale, so **any
-change there is additive**. Nothing in the engine may know about a game.
+`vale_engine` is a small private library the Vale games share: **terrain
+generation and rendering, the theme and palette, and small utilities** —
+nothing else. It is consumed by git URL and pinned through `pubspec.lock`.
+DomiVale calls it and it never calls DomiVale: there is no base class to
+extend. Breaking its public API breaks LogiVale and LumaVale, so a change
+there is additive unless every game is changed with it, and nothing in it
+may know about a game.
+
+**The frame the game runs in is DomiVale's own, in `lib/core/`:** the loop,
+the camera, the profiler, the gestures, the tile targeting and preview, the
+press ring. LogiVale and LumaVale each keep their own copy, and the copies
+are free to differ. `DomiValeGame` extends Flame's `FlameGame` directly and
+wires them itself. A widget never goes into `vale_engine`, even one that
+names no DomiVale concept: the HUD differs per game.
 
 For side-by-side development, add an untracked `pubspec_overrides.yaml`. This
 repository does not sit next to the engine, so the path is
@@ -125,8 +136,9 @@ resolves the engine from it. Never stage that rewrite: leave the file
 modified in the working tree, or `git restore pubspec.lock`. Don't use
 `git commit -a` here.
 
-What DomiVale uses from the engine, and what it deliberately does not (no
-pathfinding, no fog, no `TerrainPass`), is in `DESIGN.md` §2.
+What DomiVale uses from `vale_engine` and keeps in `lib/core/`, and what it
+deliberately does not use (no pathfinding, no fog, no `TerrainPass`), is in
+`DESIGN.md` §2.
 
 `buildRadiusCellPath` matters twice: its distance rule is the rules' reach
 rule, and `test/world/reach_test.dart` checks the two agree; and called with

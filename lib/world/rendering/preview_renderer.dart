@@ -3,7 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/painting.dart';
 import 'package:vale_engine/utils/grid_pos.dart';
 import 'package:vale_engine/utils/radius_cell_path.dart';
-import 'package:vale_engine/world/rendering/tile_preview_painter.dart';
+import 'package:domivale/core/world/rendering/tile_preview_painter.dart';
 
 import '../../game/input_controller.dart';
 import '../../theme/game_palette.dart';
@@ -23,7 +23,7 @@ class PreviewRenderer extends Component {
   final double _tileSize;
   final TilePreviewPainter _painter;
 
-  /// The offered cells as the engine's painter wants them.
+  /// The offered cells as [TilePreviewPainter] wants them.
   List<GridPos> _offered = const [];
 
   /// The cell under the pointer, or null.

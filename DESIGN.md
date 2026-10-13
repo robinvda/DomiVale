@@ -3,7 +3,8 @@
 **A small, turn-based kingdom game where the way you grow your city is the way
 you draw your border.**
 
-Flutter / Flame, mobile-first, built on the shared `vale_engine` package. Played
+Flutter / Flame, mobile-first, with its terrain and theme from the shared
+`vale_engine` library. Played
 against bot houses first, and designed so that a Wordfeud-style asynchronous
 multiplayer mode — make your move, put the phone away, your rival answers within
 a day or two — can be added later without rewriting the rules.
@@ -53,24 +54,37 @@ end wins.
 - **Dependency:** git URL pinned through `pubspec.lock`. For side-by-side
   development, an untracked `pubspec_overrides.yaml` points at the sibling
   checkout.
+- **What it is:** a library, not a framework — terrain generation and
+  rendering, the theme and palette, and small utilities, and nothing else.
+  The game calls it; it has no base class to extend.
 
 What DomiVale takes from it:
 
 | Area | Classes |
 |---|---|
-| Game mounting | `ValeGame` (loop, camera, terrain and fog layers, frame accounting, teardown), `CameraController`, `DebugController`, `RenderProfiler`, `PerformanceMonitor`, `ErrorLog` |
 | World | `TerrainWorld`, `TerrainTile`, `TerrainType`, `Biome`, `NoiseGenerator`, `HeightMapGenerator` |
-| Grid | `TileTargeting` (offered cells for an armed card), `TilePreviewPainter` (what a card would do to the cells under the pointer) |
-| Rendering | `TerrainRenderer` + `TerrainGenerator`, `buildRadiusCellPath` (border outlines), `IconAtlas` (yield and district icons), `SpriteBatch`, `TapRippleRenderer`, viewport culling helpers |
-| Input | `WorldGestures` (tap / hold / drag, camera driven internally) |
-| UI | `GamePanel`, `CollapsibleSection`, `SegmentedBar`, `CelebrationBanner`, `PanelStateController`, `FadePageRoute`, `FpsCounter`, log viewers |
+| Rendering | `TerrainRenderer` + `TerrainGenerator`, `buildRadiusCellPath` (border outlines), `IconAtlas` (yield and district icons), `SpriteBatch`, viewport culling helpers |
 | Theme | `Brand` (Nunito / Nunito Sans), `EnginePalette` |
-| Persistence | `SlotStore`, `SaveFileTransfer` |
+| Utilities | `GridPos`, `Direction` |
+
+What DomiVale keeps in `lib/core/`, its own copy of the frame the other Vale
+games also run in:
+
+| Area | Classes |
+|---|---|
+| The frame | `GameLoop`, `CameraController`, `PixelSnappedCamera`, `DebugController`, `RenderProfiler`, `PerformanceMonitor`, `ErrorLog` |
+| Grid | `TileTargeting` (offered cells for an armed card), `TilePreviewPainter` (what a card would do to the cells under the pointer) |
+| Rendering | `TapRippleRenderer`, `ProfiledTerrainRenderer` |
+| Input and screens | `WorldGestures` (tap / hold / drag, camera driven internally), `KeyboardModifiers`, `FadePageRoute`, `MenuBackgroundPainter` |
+
+`DomiValeGame` extends Flame's own `FlameGame` and wires these itself.
+Panels, charts and save slots are not shared: when DomiVale needs them, it
+takes its own copy from LogiVale.
 
 **LogiVale** and **LumaVale** are the references for code style, naming and file
-layout: `BoardWorld extends TerrainWorld`, `DomiValeGame extends ValeGame`,
-`lib/theme/game_palette.dart` beside the engine palette, one directory per
-system, renderers under `<system>/rendering/`.
+layout: `BoardWorld extends TerrainWorld`, `lib/theme/game_palette.dart`
+beside `EnginePalette`, one directory per system, renderers under
+`<system>/rendering/`.
 
 `buildRadiusCellPath` matters twice. Its distance rule — a cell is within
 radius `r` when `dx² + dy² <= (r + 0.5)²` — is the rule this game uses for
@@ -82,14 +96,15 @@ outlines any set of cells, which is what a territory border is.
 
 - **`Pathfinder`, `PathfindingService`, `PathfindingWorker`.** Nothing walks a
   route. Armies are cards, not units on the map.
-- **`ExplorationManager` / `FogRenderer`.** The whole board is visible to
-  everyone, always — it is a board game. Exploration is disabled in `onLoad`.
+- **Exploration and fog of war**, as LogiVale has them. The whole board is
+  visible to everyone, always — it is a board game — so the terrain renderer
+  is given nothing to hide.
 - **`TerrainPass` / `WorldGenConfig`.** Their noise is tuned for 256×256; a
   board of 22 to 32 cells samples a sliver of one landmass. DomiVale writes its own
-  generator on the engine's `NoiseGenerator`, as LumaVale does.
+  generator on `vale_engine`'s `NoiseGenerator`, as LumaVale does.
 - **Pawns, for now.** A cosmetic layer of little folk (banner carriers walking
   to a captured cell, a crowd at a market) is a polish item for later, using
-  the engine's pawn sprites and trails. Nothing in the rules depends on it.
+  a copy of LogiVale's pawn sprites and trails. Nothing in the rules depends on it.
 
 ---
 
@@ -103,12 +118,13 @@ The single most important structural decision, because of the multiplayer plan:
 ┌─────────────────────────────────────────────┐
 │ Flutter widgets — menus, HUD, hand, market  │
 ├─────────────────────────────────────────────┤
-│ DomiValeGame (ValeGame) — rendering, input  │
+│ DomiValeGame (FlameGame) — rendering, input │
 ├─────────────────────────────────────────────┤
 │ BoardWorld (TerrainWorld) — the board drawn │
-├─────────────────────────────────────────────┤
-│ vale_engine                                 │
-└─────────────────────────────────────────────┘
+├──────────────────────┬──────────────────────┤
+│ lib/core — loop,     │ vale_engine — terrain│
+│ camera, gestures     │ theme, palette, utils│
+└──────────────────────┴──────────────────────┘
           │ reads state, sends actions
           ▼
 ┌─────────────────────────────────────────────┐
@@ -191,8 +207,9 @@ packages/domivale_rules/
 lib/
 ├── main.dart                     ✓
 ├── app_info.dart                 ✓
+├── core/                         # the frame: loop, camera, profiler, gestures, targeting   ✓
 ├── game/
-│   ├── domivale_game.dart        # DomiValeGame extends ValeGame   ✓
+│   ├── domivale_game.dart        # DomiValeGame extends FlameGame   ✓
 │   ├── match_controller.dart     # holds the Match, applies actions, runs bot turns   ✓
 │   ├── match_setup.dart          # a skirmish's header: board, dealt seats, opening choices   ✓
 │   ├── turn_recap.dart           # replays what rivals did since your last turn

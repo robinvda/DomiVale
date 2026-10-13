@@ -14,8 +14,9 @@ border out on the side you add it. Once land is claimed, the only way to take
 it is by force. Land is the score: the house that holds the most of the valley
 at the end wins.
 
-Built with Flutter and Flame on `vale_engine`, the shared engine behind the
-Vale games, and set in the same world as LogiVale and LumaVale. Played against
+Built with Flutter and Flame, with its terrain, theme and palette from
+`vale_engine` — the small library the Vale games share — and set in the same
+world as LogiVale and LumaVale. Played against
 bot houses first, and designed so that a Wordfeud-style asynchronous
 multiplayer mode can be added later without rewriting the rules.
 
@@ -81,16 +82,19 @@ packages/domivale_rules/   # the rules: pure Dart, a path dependency
 
 lib/
 ├── main.dart              # entry point, error capture
+├── core/                  # the frame: loop, camera, profiler, gestures, targeting
 ├── game/                  # DomiValeGame, the match controller, input, setup
 ├── world/                 # the generator, BoardWorld, the renderers
 ├── theme/                 # the house colours, the look of each card kind
 └── ui/                    # menu, setup, the game screen and its HUD
 ```
 
-What comes from the engine: the game loop, camera, terrain grid and
-rendering, grid targeting and previews, gesture handling, the shared panels
-and theme, and save slots. What stays here is what DomiVale *is*: the rules,
-the board generator, the renderers for territory and cities, and the bots.
+What comes from `vale_engine`: terrain generation and rendering, the theme
+and palette, and small utilities such as `GridPos`. Everything else is
+DomiVale's own: the frame the game runs in (the loop, the camera, the
+gestures, grid targeting and previews) in `core/`, and what DomiVale *is* —
+the rules, the board generator, the renderers for territory and cities, and
+the bots — everywhere else.
 
 ## Documents
 

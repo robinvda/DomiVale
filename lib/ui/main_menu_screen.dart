@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vale_engine/theme/brand_theme.dart';
-import 'package:vale_engine/ui/fade_page_route.dart';
-import 'package:vale_engine/ui/menu_background_painter.dart';
+import 'package:domivale/core/ui/fade_page_route.dart';
+import 'package:domivale/core/ui/menu_background_painter.dart';
 
 import '../app_info.dart';
 import '../theme/game_palette.dart';
