@@ -125,16 +125,30 @@ are free to differ. `DomiValeGame` extends Flame's `FlameGame` directly and
 wires them itself. A widget never goes into `vale_engine`, even one that
 names no DomiVale concept: the HUD differs per game.
 
-For side-by-side development, add an untracked `pubspec_overrides.yaml`. This
-repository does not sit next to the engine, so the path is
-`../robinvda/vale_engine`, not `../vale_engine` (see `README.md`).
+**The game builds against the `vale_engine` commit `pubspec.lock` pins**,
+exactly as CI and a fresh clone do. To take a pushed change to the library,
+run `flutter pub upgrade vale_engine` and commit the lock with the code that
+needs it.
 
-**Check `pubspec.lock` before every commit.** With the override in place,
-every `flutter pub get` rewrites the engine stanza to `source: path`. The
-committed lock must keep `source: git` with its `resolved-ref`, because CI
-resolves the engine from it. Never stage that rewrite: leave the file
-modified in the working tree, or `git restore pubspec.lock`. Don't use
-`git commit -a` here.
+**While developing the two together**, `pubspec.yaml` may point
+`vale_engine` at a local checkout instead of the git URL:
+
+```yaml
+  vale_engine:
+    path: ../vale_engine
+```
+
+Before committing here, and always before a release:
+
+1. Commit and push the `vale_engine` changes.
+2. Put the git dependency back in `pubspec.yaml`.
+3. Run `flutter pub upgrade vale_engine`, and check that the `resolved-ref`
+   for `vale_engine` in `pubspec.lock` is the commit just pushed.
+4. Only then commit, with `pubspec.yaml` and `pubspec.lock` both on the git
+   source.
+
+A commit with the path in it builds nowhere but on this machine: CI and a
+fresh clone would look for a directory that is not there.
 
 What DomiVale uses from `vale_engine` and keeps in `lib/core/`, and what it
 deliberately does not use (no pathfinding, no fog, no `TerrainPass`), is in

@@ -51,9 +51,11 @@ end wins.
 
 - **Location:** `~/git/Github/robinvda/vale_engine`, package `vale_engine`,
   repository `git@github.com:robinvda/ValeEngine.git` (private).
-- **Dependency:** git URL pinned through `pubspec.lock`. For side-by-side
-  development, an untracked `pubspec_overrides.yaml` points at the sibling
-  checkout.
+- **Dependency:** git URL pinned through `pubspec.lock`. A change to the
+  library is pushed there and taken here with
+  `flutter pub upgrade vale_engine`. While the two are developed together
+  `pubspec.yaml` may point at a local path, but never in a commit or a
+  release (see `README.md`).
 - **What it is:** a library, not a framework — terrain generation and
   rendering, the theme and palette, and small utilities, and nothing else.
   The game calls it; it has no base class to extend.

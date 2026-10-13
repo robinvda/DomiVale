@@ -42,16 +42,32 @@ the HUD and the end-of-match panel. See [DESIGN.md](DESIGN.md) §18.
 
 DomiVale depends on `vale_engine`, a private repository
 (`github.com/robinvda/ValeEngine`), as a git dependency. You need read access
-to it for `flutter pub get` to work. To work on the engine and the game side
-by side, check the engine out and add an untracked `pubspec_overrides.yaml`
-here pointing at it. This repository does not sit next to the engine, so the
-path is:
+to it for `flutter pub get` to work.
+
+**The game builds against the `vale_engine` commit `pubspec.lock` pins**,
+exactly as CI and a fresh clone do. To take a pushed change to the library,
+run `flutter pub upgrade vale_engine` and commit the lock with the code that
+needs it.
+
+**While developing the two together**, `pubspec.yaml` may point
+`vale_engine` at a local checkout instead of the git URL:
 
 ```yaml
-dependency_overrides:
   vale_engine:
-    path: ../robinvda/vale_engine
+    path: ../vale_engine
 ```
+
+Before committing here, and always before a release:
+
+1. Commit and push the `vale_engine` changes.
+2. Put the git dependency back in `pubspec.yaml`.
+3. Run `flutter pub upgrade vale_engine`, and check that the `resolved-ref`
+   for `vale_engine` in `pubspec.lock` is the commit just pushed.
+4. Only then commit, with `pubspec.yaml` and `pubspec.lock` both on the git
+   source.
+
+A commit with the path in it builds nowhere but on this machine: CI and a
+fresh clone would look for a directory that is not there.
 
 ```bash
 flutter pub get

@@ -12,10 +12,11 @@ dependencies:
 
   # Game engine
   flame: ^1.37.0
-  # Shared engine (game loop, camera, terrain grid and rendering, grid
-  # targeting and previews, gestures, theme, save slots). Private repository:
-  # CI loads a deploy key before `pub get`. For local work against a sibling
-  # checkout, see pubspec_overrides.yaml (untracked).
+  # Terrain generation and rendering, theme and palette, and small utilities,
+  # shared by the Vale games. Private repository: CI loads a deploy key before
+  # `pub get`. To take a new engine commit: `flutter pub upgrade vale_engine`.
+  # While developing both, this may be `path: ../vale_engine`, but never in
+  # a commit: push vale_engine, restore the git source, upgrade, then commit.
   vale_engine:
     git:
       url: git@github.com:robinvda/ValeEngine.git
